@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: emotion-diary-member
+
+  datasource:
+    url: jdbc:postgresql://localhost:54316/emotionmemberdb
+    username: emotion_real
+    password: qwer1234!
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+
+    properties:
+      hibernate:
+        generate-ddl: true
+        show_sql: true
+        format_sql: true
+        default_batch_fetch_size: 50
+      open-in-view: false
