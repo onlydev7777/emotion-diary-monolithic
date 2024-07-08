@@ -1,10 +1,6 @@
 package com.example.emotiondiarymember.error;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.ElementKind;
-import jakarta.validation.Path;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -36,37 +32,11 @@ public class ApiError {
   }
 
   public static ApiError ofThrowable(Throwable throwable, HttpStatus status, String errorCode) {
-    if (throwable instanceof ConstraintViolationException cve) {
-      List<FieldError> fieldErrorList = new ArrayList<>();
-
-      cve.getConstraintViolations().forEach(constraintViolation -> {
-        StringBuilder fieldBuf = new StringBuilder();
-
-        for (Path.Node node : constraintViolation.getPropertyPath()) {
-          if (node.getKind() == ElementKind.PROPERTY || node.getKind() == ElementKind.PARAMETER) {
-            if (fieldBuf.isEmpty()) {
-              if (node.getIndex() != null) {
-                fieldBuf.append("[").append(node.getIndex()).append("] ");
-              }
-            } else {
-              fieldBuf.append(".");
-            }
-
-            fieldBuf.append(node.getName());
-          }
-
-        }
-
-        fieldErrorList.add(new FieldError(fieldBuf.toString(), null, constraintViolation.getMessage()));
-      });
-
-      return new ApiError(throwable.getMessage(), status, errorCode, fieldErrorList);
-    } else if (throwable instanceof MethodArgumentNotValidException manve) {
+    if (throwable instanceof MethodArgumentNotValidException manve) {
       return new ApiError(throwable.getMessage(), status, errorCode, ofBindingResult(manve.getBindingResult()));
-    } else {
-      return new ApiError(throwable.getMessage(), status, errorCode, null);
     }
-
+    
+    return new ApiError(throwable.getMessage(), status, errorCode, null);
   }
 
   private static List<FieldError> ofBindingResult(BindingResult bindingResult) {

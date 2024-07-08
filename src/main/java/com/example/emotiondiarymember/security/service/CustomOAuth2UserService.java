@@ -1,4 +1,4 @@
-package com.example.emotiondiarymember.security;
+package com.example.emotiondiarymember.security.service;
 
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;

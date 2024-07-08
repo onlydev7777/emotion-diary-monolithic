@@ -3,7 +3,6 @@ package com.example.emotiondiarymember.handler;
 import static com.example.emotiondiarymember.error.ApiResult.ERROR;
 
 import com.example.emotiondiarymember.error.code.ErrorCode;
-import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.TypeMismatchException;
@@ -60,14 +59,6 @@ public class GlobalExceptionHandler {
   protected ResponseEntity<?> handleMethodArgumentNotValidException(
       MethodArgumentNotValidException e) {
     log.warn("handleMethodArgumentNotValidException: {}", e.getMessage(), e);
-    return newResponse(e, HttpStatus.BAD_REQUEST);
-  }
-
-
-  //DB 제약조건 위배
-  @ExceptionHandler(ConstraintViolationException.class)
-  protected ResponseEntity<?> handleMethodConstraintViolationException(ConstraintViolationException e) {
-    log.warn("handleMethodConstraintViolationException: {}", e.getMessage(), e);
     return newResponse(e, HttpStatus.BAD_REQUEST);
   }
 

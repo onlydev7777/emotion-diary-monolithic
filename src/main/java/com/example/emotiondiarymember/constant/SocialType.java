@@ -1,5 +1,5 @@
 package com.example.emotiondiarymember.constant;
 
 public enum SocialType {
-  GOOGLE, NAVER, KAKAO
+  GOOGLE, NAVER, KAKAO, NONE
 }
