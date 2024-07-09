@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Getter
 @AllArgsConstructor
@@ -58,9 +57,5 @@ public class MemberDetails implements UserDetails {
 
   public static MemberDetails of(Member member) {
     return new MemberDetails(member.getId(), member.getUserId(), member.getPassword().getPassword(), member.getEmail(), member.getRole());
-  }
-
-  public boolean equalsPassword(String requestPassword, PasswordEncoder passwordEncoder) {
-    return getPassword().equals(passwordEncoder.encode(requestPassword));
   }
 }

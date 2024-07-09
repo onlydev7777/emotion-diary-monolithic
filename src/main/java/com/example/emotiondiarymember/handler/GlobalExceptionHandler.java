@@ -10,6 +10,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.AuthorizationServiceException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.HttpMediaTypeException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -64,7 +67,7 @@ public class GlobalExceptionHandler {
 
   //404 NOT_FOUND
   @ExceptionHandler(NoHandlerFoundException.class)
-  public ResponseEntity<?> handleNoHandlerFoundException(Exception e) {
+  public ResponseEntity<?> handleNoHandlerFoundException(NoHandlerFoundException e) {
     log.error("handleNoHandlerFoundException: {}", e.getMessage(), e);
     return newResponse(e, HttpStatus.NOT_FOUND);
   }
@@ -87,12 +90,30 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(HttpMediaTypeException.class)
-  public ResponseEntity<?> handleHttpMediaTypeException(Exception e) {
+  public ResponseEntity<?> handleHttpMediaTypeException(HttpMediaTypeException e) {
     log.warn("handleHttpMediaTypeException: {}", e.getMessage(), e);
     return newResponse(e, HttpStatus.UNSUPPORTED_MEDIA_TYPE);
   }
 
-  /* Custom Exception */
+  /* Security Exception */
+  @ExceptionHandler(AuthenticationException.class)
+  public ResponseEntity<?> handleAuthenticationException(AuthenticationException e) {
+    log.error("handleAuthenticationException: {}", e.getMessage(), e);
+    return newResponse(e, HttpStatus.UNAUTHORIZED);
+  }
+
+  @ExceptionHandler(AuthorizationServiceException.class)
+  public ResponseEntity<?> handleAuthorizationException(AuthorizationServiceException e) {
+    log.error("AuthorizationServiceException: {}", e.getMessage(), e);
+    return newResponse(e, HttpStatus.FORBIDDEN);
+  }
+
+  @ExceptionHandler(AccessDeniedException.class)
+  public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException e) {
+    log.error("AccessDeniedException: {}", e.getMessage(), e);
+    return newResponse(e, HttpStatus.FORBIDDEN);
+  }
+
   @ExceptionHandler({Exception.class, RuntimeException.class})
   public ResponseEntity<?> handleException(Exception e) {
     log.error("handleException: {}", e.getMessage(), e);

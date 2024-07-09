@@ -11,14 +11,13 @@ import com.example.emotiondiarymember.security.authentication.LoginAuthenticatio
 import com.example.emotiondiarymember.security.authentication.LoginRequest;
 import com.example.emotiondiarymember.security.jwt.Jwt;
 import com.example.emotiondiarymember.security.jwt.JwtProvider;
-import com.example.emotiondiarymember.security.jwt.JwtProvider.Payload;
+import com.example.emotiondiarymember.security.jwt.Payload;
 import com.example.emotiondiarymember.security.service.LoginService;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 class LoginAuthenticationProviderTest extends IntegrationTestSupport {
@@ -45,17 +44,17 @@ class LoginAuthenticationProviderTest extends IntegrationTestSupport {
     LoginAuthentication unauthenticated = LoginAuthentication.unauthenticated(loginRequest);
 
     //when
-    Authentication authenticate = loginAuthenticationProvider.authenticate(unauthenticated);
+    LoginAuthentication authenticate = (LoginAuthentication) loginAuthenticationProvider.authenticate(unauthenticated);
 
     //then
     List<String> authoritiesNames = authenticate.getAuthorities().stream()
         .map(grantedAuthority -> grantedAuthority.getAuthority())
         .collect(Collectors.toList());
 
-    assertThat(authenticate.getPrincipal()).isInstanceOf(Jwt.class);
+    assertThat(authenticate.getPrincipal()).isInstanceOf(Payload.class);
     assertThat(authoritiesNames).containsExactly(Role.USER.getAuthority());
 
-    Jwt jwt = (Jwt) authenticate.getPrincipal();
+    Jwt jwt = authenticate.getJwt();
     Payload payload = jwtProvider.verifyToken(jwt.getAccessToken());
     Member findMember = memberRepository.findByUserIdAndSocialType(userId, SocialType.NONE)
         .orElseThrow();

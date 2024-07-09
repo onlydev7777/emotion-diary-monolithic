@@ -4,6 +4,7 @@ import com.example.emotiondiarymember.security.authentication.LoginAuthenticatio
 import com.example.emotiondiarymember.security.dto.MemberDetails;
 import com.example.emotiondiarymember.security.jwt.Jwt;
 import com.example.emotiondiarymember.security.jwt.JwtProvider;
+import com.example.emotiondiarymember.security.jwt.Payload;
 import com.example.emotiondiarymember.security.service.LoginService;
 import com.example.emotiondiarymember.security.util.AuthenticationUtil;
 import java.util.List;
@@ -47,8 +48,9 @@ public class LoginAuthenticationProvider implements AuthenticationProvider {
     String accessToken = jwtProvider.createToken(memberDetails.getId(), memberDetails.getUserId(), memberDetails.getEmail(), memberDetails.getRole());
     String refreshToken = jwtProvider.refreshToken(memberDetails.getId(), memberDetails.getUserId());
     Jwt jwt = new Jwt(accessToken, refreshToken);
+    Payload payload = new Payload(memberDetails.getId(), memberDetails.getUserId(), memberDetails.getEmail(), memberDetails.getRole());
 
-    return LoginAuthentication.authenticated(jwt, List.of(memberDetails.getRole()));
+    return LoginAuthentication.authenticated(payload, jwt, List.of(memberDetails.getRole()));
   }
 
   @Override

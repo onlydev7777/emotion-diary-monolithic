@@ -6,10 +6,12 @@ import org.springframework.http.HttpStatus;
 @Getter
 public class ApiResult<T> {
 
-  private final boolean success;
+  private boolean success;
+  private T response;
+  private ApiError error;
 
-  private final T response;
-  private final ApiError error;
+  public ApiResult() {
+  }
 
   private ApiResult(boolean success, T response, ApiError error) {
     this.success = success;

@@ -1,6 +1,7 @@
 package com.example.emotiondiarymember.security.authentication;
 
 import com.example.emotiondiarymember.security.jwt.Jwt;
+import com.example.emotiondiarymember.security.jwt.Payload;
 import java.util.Collection;
 import java.util.List;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -10,11 +11,17 @@ import org.springframework.security.core.GrantedAuthority;
 public class LoginAuthentication extends AbstractAuthenticationToken {
 
   private Object principal;
+  private Jwt jwt;
   private Object credentials;
 
-  public LoginAuthentication(Object principal, Collection<? extends GrantedAuthority> authorities) {
+  public LoginAuthentication() {
+    super(null);
+  }
+
+  public LoginAuthentication(Object principal, Jwt jwt, Collection<? extends GrantedAuthority> authorities) {
     super(authorities);
     this.principal = principal;
+    this.jwt = jwt;
     this.credentials = null;
     setAuthenticated(true);
   }
@@ -34,8 +41,8 @@ public class LoginAuthentication extends AbstractAuthenticationToken {
     return new LoginAuthentication(principal, credentials);
   }
 
-  public static LoginAuthentication authenticated(Jwt principal, List<? extends GrantedAuthority> authorities) {
-    return new LoginAuthentication(principal, authorities);
+  public static LoginAuthentication authenticated(Payload payload, Jwt jwt, List<? extends GrantedAuthority> authorities) {
+    return new LoginAuthentication(payload, jwt, authorities);
   }
 
   @Override
@@ -46,6 +53,10 @@ public class LoginAuthentication extends AbstractAuthenticationToken {
   @Override
   public Object getCredentials() {
     return credentials;
+  }
+
+  public Jwt getJwt() {
+    return jwt;
   }
 
   private static void validateCheck(String principal, String credentials) {
