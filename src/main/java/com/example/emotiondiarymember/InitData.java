@@ -1,6 +1,5 @@
 package com.example.emotiondiarymember;
 
-import com.example.emotiondiarymember.constant.Role;
 import com.example.emotiondiarymember.constant.SocialType;
 import com.example.emotiondiarymember.entity.Member;
 import com.example.emotiondiarymember.entity.embeddable.Email;
@@ -25,8 +24,7 @@ public class InitData {
         new Password("qwer1234!", passwordEncoder),
         "테스트",
         new Email("test@test.com"),
-        SocialType.NONE,
-        Role.USER)
+        SocialType.NONE)
     );
   }
 }

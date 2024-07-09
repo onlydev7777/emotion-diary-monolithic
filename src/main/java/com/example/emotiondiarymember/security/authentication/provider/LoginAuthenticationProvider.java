@@ -25,10 +25,8 @@ public class LoginAuthenticationProvider implements AuthenticationProvider {
   private final JwtProvider jwtProvider;
 
   /**
-   * 1. 미인증 상태의 Authrntication 을 파라미터로 받는다.
-   * 2. DB 에서 요청 id와 요청 password를 검증
-   * 3. 검증 완료 시 '인증완료' 상태의 Authrntication 을 반환한다.
-   * 4. 반환된 Authrntication 은 AbstractAuthenticationProcessingFilter 의 successfulAuthentication 메서드 에서 SecurityContext 에 저장된다.
+   * 1. 미인증 상태의 Authrntication 을 파라미터로 받는다. 2. DB 에서 요청 id와 요청 password를 검증 3. 검증 완료 시 '인증완료' 상태의 Authrntication 을 반환한다. 4. 반환된 Authrntication 은
+   * AbstractAuthenticationProcessingFilter 의 successfulAuthentication 메서드 에서 SecurityContext 에 저장된다.
    *
    * @param authentication the authentication request object.
    * @return
@@ -45,12 +43,12 @@ public class LoginAuthenticationProvider implements AuthenticationProvider {
       throw new BadCredentialsException("Password Not Matches!");
     }
 
-    String accessToken = jwtProvider.createToken(memberDetails.getId(), memberDetails.getUserId(), memberDetails.getEmail(), memberDetails.getRole());
+    String accessToken = jwtProvider.createToken(memberDetails.getId(), memberDetails.getUserId(), memberDetails.getEmail());
     String refreshToken = jwtProvider.refreshToken(memberDetails.getId(), memberDetails.getUserId());
     Jwt jwt = new Jwt(accessToken, refreshToken);
-    Payload payload = new Payload(memberDetails.getId(), memberDetails.getUserId(), memberDetails.getEmail(), memberDetails.getRole());
+    Payload payload = new Payload(memberDetails.getId(), memberDetails.getUserId(), memberDetails.getEmail());
 
-    return LoginAuthentication.authenticated(payload, jwt, List.of(memberDetails.getRole()));
+    return LoginAuthentication.authenticated(payload, jwt, List.of());
   }
 
   @Override

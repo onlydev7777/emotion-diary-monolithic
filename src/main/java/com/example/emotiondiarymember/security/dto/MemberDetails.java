@@ -1,6 +1,5 @@
 package com.example.emotiondiarymember.security.dto;
 
-import com.example.emotiondiarymember.constant.Role;
 import com.example.emotiondiarymember.entity.Member;
 import com.example.emotiondiarymember.entity.embeddable.Email;
 import java.util.Collection;
@@ -17,7 +16,7 @@ public class MemberDetails implements UserDetails {
   private String userId;
   private String password;
   private Email email;
-  private Role role;
+//  private Role role;
 
   @Override
   public String getUsername() {
@@ -56,6 +55,6 @@ public class MemberDetails implements UserDetails {
   }
 
   public static MemberDetails of(Member member) {
-    return new MemberDetails(member.getId(), member.getUserId(), member.getPassword().getPassword(), member.getEmail(), member.getRole());
+    return new MemberDetails(member.getId(), member.getUserId(), member.getPassword().getPassword(), member.getEmail());
   }
 }

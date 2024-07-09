@@ -3,6 +3,7 @@ package com.example.emotiondiarymember.handler;
 import static com.example.emotiondiarymember.error.ApiResult.ERROR;
 
 import com.example.emotiondiarymember.error.code.ErrorCode;
+import io.jsonwebtoken.JwtException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.TypeMismatchException;
@@ -96,8 +97,8 @@ public class GlobalExceptionHandler {
   }
 
   /* Security Exception */
-  @ExceptionHandler(AuthenticationException.class)
-  public ResponseEntity<?> handleAuthenticationException(AuthenticationException e) {
+  @ExceptionHandler({AuthenticationException.class, JwtException.class})
+  public ResponseEntity<?> handleAuthenticationException(RuntimeException e) {
     log.error("handleAuthenticationException: {}", e.getMessage(), e);
     return newResponse(e, HttpStatus.UNAUTHORIZED);
   }

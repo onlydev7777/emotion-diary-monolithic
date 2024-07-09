@@ -1,6 +1,5 @@
 package com.example.emotiondiarymember.entity;
 
-import com.example.emotiondiarymember.constant.Role;
 import com.example.emotiondiarymember.constant.SocialType;
 import com.example.emotiondiarymember.entity.embeddable.Email;
 import com.example.emotiondiarymember.entity.embeddable.Password;
@@ -43,27 +42,27 @@ public class Member {
   @Enumerated(EnumType.STRING)
   private SocialType socialType;
 
-  @Enumerated(EnumType.STRING)
-  private Role role;
+//  @Enumerated(EnumType.STRING)
+//  private Role role;
 
   @Builder
-  private Member(String userId, Password password, String name, Email email, SocialType socialType, Role role) {
+  private Member(String userId, Password password, String name, Email email, SocialType socialType) {
     this.userId = userId;
     this.password = password;
     this.name = name;
     this.email = email;
     this.socialType = socialType;
-    this.role = role;
+//    this.role = role;
   }
 
-  public static Member of(String userId, Password password, String name, Email email, SocialType socialType, Role role) {
+  public static Member of(String userId, Password password, String name, Email email, SocialType socialType) {
     return Member.builder()
         .userId(userId)
         .password(password)
         .name(name)
         .email(email)
         .socialType(socialType)
-        .role(role)
+//        .role(role)
         .build();
   }
 }

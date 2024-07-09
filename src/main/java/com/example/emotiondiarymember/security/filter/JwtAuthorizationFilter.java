@@ -5,6 +5,7 @@ import com.example.emotiondiarymember.security.authentication.LoginAuthenticatio
 import com.example.emotiondiarymember.security.jwt.Jwt;
 import com.example.emotiondiarymember.security.jwt.JwtProvider;
 import com.example.emotiondiarymember.security.jwt.Payload;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -52,23 +53,30 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
       Payload payload = jwtProvider.verifyToken(token);
       Jwt jwt = new Jwt(token, refreshToken);
 
-      Authentication authenticated = LoginAuthentication.authenticated(payload, jwt, List.of(payload.getRole()));
+      Authentication authenticated = LoginAuthentication.authenticated(payload, jwt, List.of());
       SecurityContextHolder.getContext().setAuthentication(authenticated);
 
       filterChain.doFilter(request, response);
     } catch (AuthenticationException e) {
+      resolver.resolveException(request, response, null, e);
+    } catch (JwtException e) {
+      resolver.resolveException(request, response, null, e);
+    } catch (RuntimeException e) {
       resolver.resolveException(request, response, null, e);
     }
   }
 
   private String resolveToken(HttpServletRequest request) {
     String bearerToken = request.getHeader(HEADER_NAME);
-    if (bearerToken != null) {
-      String decodedToken = URLDecoder.decode(bearerToken, StandardCharsets.UTF_8);
-      if (decodedToken.startsWith(TOKEN_PREFIX)) {
-        return decodedToken.substring(7);
-      }
+    if (bearerToken == null) {
+      throw new CustomAuthenticationException("Token is Not Empty!");
     }
-    throw new CustomAuthenticationException("Token Parsing Error!");
+
+    String decodedToken = URLDecoder.decode(bearerToken, StandardCharsets.UTF_8);
+    if (decodedToken.startsWith(TOKEN_PREFIX)) {
+      return decodedToken.substring(7);
+    }
+
+    throw new CustomAuthenticationException("Invalid Prefix Token!");
   }
 }

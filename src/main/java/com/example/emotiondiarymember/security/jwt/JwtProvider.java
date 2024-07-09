@@ -1,6 +1,5 @@
 package com.example.emotiondiarymember.security.jwt;
 
-import com.example.emotiondiarymember.constant.Role;
 import com.example.emotiondiarymember.entity.embeddable.Email;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -31,8 +30,8 @@ public class JwtProvider {
   private int refreshExpirationTime = 24 * 60 * 60 * 1000; // 하루
   private final static String CLAIMS_KEY = "payload";
 
-  public String createToken(Long id, String userId, Email email, Role role) {
-    Payload payload = new Payload(id, userId, email, role);
+  public String createToken(Long id, String userId, Email email) {
+    Payload payload = new Payload(id, userId, email);
     SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
     String subject = id + "/" + userId;
 

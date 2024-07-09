@@ -1,6 +1,5 @@
 package com.example.emotiondiarymember.security.jwt;
 
-import com.example.emotiondiarymember.constant.Role;
 import com.example.emotiondiarymember.entity.embeddable.Email;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,5 +13,5 @@ public class Payload {
   private Long id;
   private String userId;
   private Email email;
-  private Role role;
+//  private Role role;
 }

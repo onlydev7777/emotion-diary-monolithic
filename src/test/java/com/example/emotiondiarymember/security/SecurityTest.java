@@ -3,7 +3,6 @@ package com.example.emotiondiarymember.security;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.emotiondiarymember.IntegrationTestSupport;
-import com.example.emotiondiarymember.constant.Role;
 import com.example.emotiondiarymember.constant.SocialType;
 import com.example.emotiondiarymember.error.ApiError;
 import com.example.emotiondiarymember.error.ApiResult;
@@ -96,7 +95,7 @@ public class SecurityTest extends IntegrationTestSupport {
     assertThat(result.isSuccess()).isTrue();
     assertThat(result.getError()).isNull();
     assertThat(payload.getUserId()).isEqualTo(ID);
-    assertThat(payload.getRole()).isEqualTo(Role.USER);
+//    assertThat(payload.getRole()).isEqualTo(Role.USER);
   }
 
   @DisplayName("로그인 없이 '/ok' 접속 시 401 오류 발생")
