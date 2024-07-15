@@ -37,7 +37,7 @@ public class SecurityConfig {
   @Autowired
   @Qualifier("handlerExceptionResolver")
   private HandlerExceptionResolver resolver;
-  private final String[] SKIP_LIST = {"/", "/login"};
+  private final String[] SKIP_LIST = {"/", "/login", "/login-test"};
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
