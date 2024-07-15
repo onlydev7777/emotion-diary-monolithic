@@ -7,6 +7,7 @@ import com.example.emotiondiarymember.mapper.ResourcesMapper;
 import com.example.emotiondiarymember.repository.ResourcesRepository;
 import com.example.emotiondiarymember.repository.RoleRepository;
 import com.example.emotiondiarymember.repository.RoleResourcesRepository;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,5 +28,14 @@ public class ResourcesService {
         role -> roleResourcesRepository.save(RoleResources.of(role, savedResources))
     );
     return mapper.toDto(savedResources, dto.getRoleIds());
+  }
+
+  public ResourcesDto findById(Long resourceId) {
+    Resources resources = repository.findById(resourceId)
+        .orElseThrow();
+
+    return mapper.toDto(resources, resources.getRoleResources().stream()
+        .map(rr -> rr.getRole().getId())
+        .collect(Collectors.toSet()));
   }
 }

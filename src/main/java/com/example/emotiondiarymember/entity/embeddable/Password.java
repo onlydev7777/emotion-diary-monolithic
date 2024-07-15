@@ -2,6 +2,7 @@ package com.example.emotiondiarymember.entity.embeddable;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.AccessLevel;
@@ -32,5 +33,21 @@ public class Password {
     if (!matcher.find()) {
       throw new IllegalArgumentException("패스워드는 8자 이상 16자 이하 특수문자 1개 이상 포함되어야 합니다.");
     }
+  }
+
+  @Override
+  public boolean equals(Object object) {
+    if (this == object) {
+      return true;
+    }
+    if (!(object instanceof Password password1)) {
+      return false;
+    }
+    return Objects.equals(getPassword(), password1.getPassword());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getPassword());
   }
 }

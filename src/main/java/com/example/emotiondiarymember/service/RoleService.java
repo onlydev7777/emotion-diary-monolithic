@@ -20,4 +20,11 @@ public class RoleService {
     Role savedRole = repository.save(mapper.toEntity(dto));
     return mapper.toDto(savedRole);
   }
+
+  public RoleDto findById(Long roleId) {
+    Role role = repository.findById(roleId)
+        .orElseThrow();
+    
+    return mapper.toDto(role);
+  }
 }

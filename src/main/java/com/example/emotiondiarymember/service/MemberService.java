@@ -7,8 +7,8 @@ import com.example.emotiondiarymember.mapper.MemberMapper;
 import com.example.emotiondiarymember.repository.MemberRepository;
 import com.example.emotiondiarymember.repository.MemberRoleRepository;
 import com.example.emotiondiarymember.repository.RoleRepository;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,14 +21,22 @@ public class MemberService {
   private final RoleRepository roleRepository;
   private final MemberRoleRepository memberRoleRepository;
   private final MemberMapper mapper;
-  private final PasswordEncoder passwordEncoder;
 
   public MemberDto save(MemberDto dto) {
-    Member savedMember = repository.save(mapper.toEntity(dto, passwordEncoder));
+    Member savedMember = repository.save(mapper.toEntity(dto));
     roleRepository.findAllById(dto.getRoleIds()).forEach(
         role -> memberRoleRepository.save(MemberRole.of(savedMember, role))
     );
 
     return mapper.toDto(savedMember, dto.getRoleIds());
+  }
+
+  public MemberDto findById(Long memberId) {
+    Member member = repository.findById(memberId)
+        .orElseThrow();
+
+    return mapper.toDto(member, member.getMemberRoles().stream()
+        .map(mr -> mr.getRole().getId())
+        .collect(Collectors.toSet()));
   }
 }
