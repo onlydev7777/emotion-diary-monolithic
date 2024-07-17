@@ -22,6 +22,31 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Jwt 인증에 대한 오류 처리 방법
+ *
+ * 1. Exception 을 receive 하는 ReceivingJwtExceptionFilter 에서 처리
+ *    : AuthenticationException 인증 오류
+ *    : AccessDeniedException 인가 오류
+ *    : RuntimeException 런타임 오류
+ *
+ * 2. Security 에서 제공해주는 ExceptionTranslationFilter 의 handleSpringSecurityException() method 에서 처리
+ *    : AuthenticationException 인증 오류
+ *      > CustomAuthenticationFailureEntryPoint 에서 처리
+ *    : AccessDeniedException 인가 오류
+ *      > CustomAccessDeniedHandler 에서 처리
+ *
+ * 3. GlobalExceptionHandler 에서 한번에 처리
+ *    : 의존성 주입 받아서 사용
+ *      @Autowired 주입
+ *      @Qualifier("handlerExceptionResolver")
+ *      private HandlerExceptionResolver resolver;
+ *
+ *    : Filter 단에서 try-catch 로 받아서 resolveException 호출
+ *      > resolver.resolveException(request, response, null, e);
+ *
+ *
+ */
 @Configuration
 @RequiredArgsConstructor
 @EnableWebSecurity

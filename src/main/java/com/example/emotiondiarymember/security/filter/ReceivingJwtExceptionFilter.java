@@ -11,20 +11,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-/**
- * Jwt 인증에 대한 오류 처리 방법
- *
- * 1. Exception 을 receive 하는 ReceivingJwtExceptionFilter 에서 처리
- *    : AuthenticationException 인증 오류
- *    : AccessDeniedException 인가 오류
- *    : RuntimeException 런타임 오류
- *
- * 2. Security 에서 제공해주는 ExceptionTranslationFilter 의 handleSpringSecurityException() method 에서 처리
- *    : AuthenticationException 인증 오류
- *      > CustomAuthenticationFailureEntryPoint 에서 처리
- *    : AccessDeniedException 인가 오류
- *      > CustomAccessDeniedHandler 에서 처리
- */
 public class ReceivingJwtExceptionFilter extends OncePerRequestFilter {
 
   @Override
