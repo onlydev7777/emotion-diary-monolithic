@@ -24,7 +24,7 @@ public class LoginService implements UserDetailsService {
 
     return MemberDetails.of(
         repository.findByUserIdAndSocialType(id, type).orElseThrow(
-            () -> new UsernameNotFoundException(username + " Not Found")
+            () -> new UsernameNotFoundException(id + " Not Found")
         )
     );
   }

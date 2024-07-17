@@ -5,7 +5,6 @@ import com.example.emotiondiarymember.security.authentication.LoginAuthenticatio
 import com.example.emotiondiarymember.security.jwt.Jwt;
 import com.example.emotiondiarymember.security.jwt.JwtProvider;
 import com.example.emotiondiarymember.security.jwt.Payload;
-import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,10 +15,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.web.servlet.HandlerExceptionResolver;
 
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
@@ -28,12 +25,10 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
   private final String[] skipUrlList;
   private final JwtProvider jwtProvider;
 
-  private final HandlerExceptionResolver resolver;
 
-  public JwtAuthorizationFilter(String[] SKIP_LIST, JwtProvider jwtProvider, HandlerExceptionResolver resolver) {
+  public JwtAuthorizationFilter(String[] SKIP_LIST, JwtProvider jwtProvider) {
     this.skipUrlList = SKIP_LIST;
     this.jwtProvider = jwtProvider;
-    this.resolver = resolver;
   }
 
   @Override
@@ -42,28 +37,21 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     boolean skip = Arrays.stream(skipUrlList)
         .anyMatch(url -> url.equals(request.getRequestURI()));
+
     if (skip) {
       filterChain.doFilter(request, response);
       return;
     }
 
-    try {
-      String token = resolveToken(request);
-      String refreshToken = request.getHeader("Refresh-Token");
-      Payload payload = jwtProvider.verifyToken(token);
-      Jwt jwt = new Jwt(token, refreshToken);
+    String token = resolveToken(request);
+    String refreshToken = request.getHeader("Refresh-Token");
+    Payload payload = jwtProvider.verifyToken(token);
+    Jwt jwt = new Jwt(token, refreshToken);
 
-      Authentication authenticated = LoginAuthentication.authenticated(payload, jwt, List.of());
-      SecurityContextHolder.getContext().setAuthentication(authenticated);
+    Authentication authenticated = LoginAuthentication.authenticated(payload, jwt, List.of());
+    SecurityContextHolder.getContext().setAuthentication(authenticated);
 
-      filterChain.doFilter(request, response);
-    } catch (AuthenticationException e) {
-      resolver.resolveException(request, response, null, e);
-    } catch (JwtException e) {
-      resolver.resolveException(request, response, null, e);
-    } catch (RuntimeException e) {
-      resolver.resolveException(request, response, null, e);
-    }
+    filterChain.doFilter(request, response);
   }
 
   private String resolveToken(HttpServletRequest request) {

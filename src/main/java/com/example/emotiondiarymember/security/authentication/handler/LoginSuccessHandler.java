@@ -7,6 +7,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -21,9 +22,13 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
     Jwt jwt = ((LoginAuthentication) authentication).getJwt();
 
     response.setStatus(HttpStatus.OK.value());
-    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+    response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+
     response.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + jwt.getAccessToken());
     response.setHeader("Refresh-Token", "Bearer " + jwt.getRefreshToken());
-    response.getWriter().println(new ObjectMapper().writeValueAsString(jwt));
+    PrintWriter writer = response.getWriter();
+    writer.println(new ObjectMapper().writeValueAsString(jwt));
+    writer.flush();
+    writer.close();
   }
 }

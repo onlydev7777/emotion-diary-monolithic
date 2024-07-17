@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
@@ -41,7 +42,7 @@ public class GlobalExceptionHandler {
    */
   private ResponseEntity<?> newResponse(Throwable throwable, HttpStatus status, String customErrorCode) {
     HttpHeaders headers = new HttpHeaders();
-    headers.add("Content-Type", "application/json");
+    headers.add("Content-Type", MediaType.APPLICATION_JSON_UTF8_VALUE);
     return new ResponseEntity<>(ERROR(throwable, status, customErrorCode),
         headers, status);
   }
@@ -53,7 +54,7 @@ public class GlobalExceptionHandler {
    */
   private ResponseEntity<?> newResponse(HttpStatus status, ErrorCode errorCode) {
     HttpHeaders headers = new HttpHeaders();
-    headers.add("Content-Type", "application/json");
+    headers.add("Content-Type", MediaType.APPLICATION_JSON_UTF8_VALUE);
     return new ResponseEntity<>(ERROR(errorCode.getMessage(), status, errorCode.getErrorCode()),
         headers, status);
   }
