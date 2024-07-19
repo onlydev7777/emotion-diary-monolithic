@@ -76,7 +76,7 @@ public class SecurityConfig {
             .requestMatchers(SKIP_LIST).permitAll()
             .requestMatchers("/admin").hasRole("ADMIN")
             .anyRequest().authenticated())
-        .logout(logout -> logout.logoutSuccessUrl("/"))
+//        .logout(logout -> logout.logoutSuccessUrl("/signin"))
         .authenticationManager(authenticationManager)
         .exceptionHandling(ex -> ex
             .accessDeniedHandler(customAccessDeniedHandler)
