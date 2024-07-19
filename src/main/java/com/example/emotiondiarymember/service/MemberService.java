@@ -22,6 +22,7 @@ public class MemberService {
   private final MemberRoleRepository memberRoleRepository;
   private final MemberMapper mapper;
 
+  @Transactional
   public MemberDto save(MemberDto dto) {
     Member savedMember = repository.save(mapper.toEntity(dto));
     roleRepository.findAllById(dto.getRoleIds()).forEach(
@@ -38,5 +39,12 @@ public class MemberService {
     return mapper.toDto(member, member.getMemberRoles().stream()
         .map(mr -> mr.getRole().getId())
         .collect(Collectors.toSet()));
+  }
+
+  @Transactional
+  public void deleteById(Long memberId) {
+    Member member = repository.findById(memberId)
+        .orElseThrow();
+    repository.delete(member);
   }
 }

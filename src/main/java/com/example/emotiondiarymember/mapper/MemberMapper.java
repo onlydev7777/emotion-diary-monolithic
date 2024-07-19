@@ -1,5 +1,7 @@
 package com.example.emotiondiarymember.mapper;
 
+import com.example.emotiondiarymember.controller.request.MemberJoinRequest;
+import com.example.emotiondiarymember.controller.response.MemberJoinResponse;
 import com.example.emotiondiarymember.dto.MemberDto;
 import com.example.emotiondiarymember.entity.Member;
 import com.example.emotiondiarymember.entity.embeddable.Email;
@@ -29,4 +31,10 @@ public interface MemberMapper {
   default Email toEmail(String email) {
     return new Email(email);
   }
+
+  MemberJoinResponse toResponse(MemberDto memberDto);
+
+  @Mapping(target = "password", expression = "java(toPassword(request.getPassword(), passwordEncoder))")
+  @Mapping(target = "email", expression = "java(toEmail(request.getEmail()))")
+  MemberDto toDto(MemberJoinRequest request, @Context PasswordEncoder passwordEncoder);
 }

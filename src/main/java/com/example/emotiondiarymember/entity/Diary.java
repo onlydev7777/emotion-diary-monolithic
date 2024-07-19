@@ -1,6 +1,7 @@
 package com.example.emotiondiarymember.entity;
 
 import com.example.emotiondiarymember.constant.EmotionStatus;
+import com.example.emotiondiarymember.util.DateUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -40,10 +41,20 @@ public class Diary {
   @Column(name = "diary_date", nullable = false)
   private LocalDate diaryDate;
 
+  @Column(name = "diary_year_month", nullable = false, length = 6)
+  private String diaryYearMonth;
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "member_id", nullable = false)
   private Member member;
 
+  public void update(String subject, String content, EmotionStatus emotionStatus, LocalDate diaryDate) {
+    this.subject = subject;
+    this.content = content;
+    this.emotionStatus = emotionStatus;
+    this.diaryDate = diaryDate;
+    this.diaryYearMonth = DateUtil.getYearMonth(diaryDate);
+  }
 
   @Builder
   public Diary(String subject, String content, EmotionStatus emotionStatus, LocalDate diaryDate, Member member) {
@@ -51,6 +62,7 @@ public class Diary {
     this.content = content;
     this.emotionStatus = emotionStatus;
     this.diaryDate = diaryDate;
+    this.diaryYearMonth = DateUtil.getYearMonth(diaryDate);
     this.member = member;
   }
 

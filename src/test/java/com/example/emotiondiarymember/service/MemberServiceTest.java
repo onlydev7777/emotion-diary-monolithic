@@ -1,6 +1,7 @@
 package com.example.emotiondiarymember.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.example.emotiondiarymember.IntegrationTestSupport;
 import com.example.emotiondiarymember.TestComponent;
@@ -9,6 +10,7 @@ import com.example.emotiondiarymember.entity.Member;
 import com.example.emotiondiarymember.mapper.MemberMapper;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,7 +38,8 @@ class MemberServiceTest extends IntegrationTestSupport {
   Collection<DynamicTest> dynamicTests() {
     return Arrays.asList(
         DynamicTest.dynamicTest("회원가입이 정상적으로 수행된다.", () -> save()),
-        DynamicTest.dynamicTest("회원가입 된 계정으로 정상조회가 가능하다.", () -> findById())
+        DynamicTest.dynamicTest("회원가입 된 계정으로 정상조회가 가능하다.", () -> findById()),
+        DynamicTest.dynamicTest("계정을 정상 삭제할 수 있다.", () -> delete())
     );
   }
 
@@ -61,5 +64,11 @@ class MemberServiceTest extends IntegrationTestSupport {
     MemberDto findDto = service.findById(savedMemberId);
 
     Assertions.assertThat(savedMemberDto).isEqualTo(findDto);
+  }
+
+  void delete() {
+    service.deleteById(savedMemberDto.getId());
+    assertThatThrownBy(() -> service.findById(savedMemberDto.getId()))
+        .isInstanceOf(NoSuchElementException.class);
   }
 }

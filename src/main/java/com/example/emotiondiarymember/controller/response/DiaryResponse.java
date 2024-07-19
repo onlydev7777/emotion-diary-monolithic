@@ -1,4 +1,4 @@
-package com.example.emotiondiarymember.dto;
+package com.example.emotiondiarymember.controller.response;
 
 import com.example.emotiondiarymember.constant.EmotionStatus;
 import java.time.LocalDate;
@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DiaryDto {
+public class DiaryResponse {
 
   private Long id;
   private String subject;
@@ -22,8 +22,4 @@ public class DiaryDto {
   private LocalDate diaryDate;
   private String diaryYearMonth;
   private Long memberId;
-
-  public void setMemberId(Long memberId) {
-    this.memberId = memberId;
-  }
 }
