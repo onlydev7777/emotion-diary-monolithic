@@ -27,7 +27,7 @@ class RoleServiceTest extends IntegrationTestSupport {
 
   @BeforeEach
   void setUp() {
-    testComponent.defaultSetUpRole();
+    testComponent.defaultSetUpDiary();
   }
 
   @TestFactory

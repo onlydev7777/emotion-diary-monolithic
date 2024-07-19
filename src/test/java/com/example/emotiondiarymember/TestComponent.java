@@ -1,11 +1,14 @@
 package com.example.emotiondiarymember;
 
+import com.example.emotiondiarymember.constant.EmotionStatus;
 import com.example.emotiondiarymember.constant.SocialType;
+import com.example.emotiondiarymember.entity.Diary;
 import com.example.emotiondiarymember.entity.Member;
 import com.example.emotiondiarymember.entity.auth.Resources;
 import com.example.emotiondiarymember.entity.auth.Role;
 import com.example.emotiondiarymember.entity.embeddable.Email;
 import com.example.emotiondiarymember.entity.embeddable.Password;
+import java.time.LocalDate;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -22,6 +25,8 @@ public class TestComponent {
   private Resources resources2;
   private Role role;
   private Role role2;
+  private Diary diary;
+  private Diary diary2;
 
   @Autowired
   private PasswordEncoder passwordEncoder;
@@ -42,11 +47,19 @@ public class TestComponent {
     setResources(resources2);
   }
 
-  public void defaultSetUpRole() {
+  public void defaultSetUpDiary() {
     role = Role.of("사용자", "사용자 권한");
     role2 = Role.of("관리자", "관리자 권한");
 
     setRole(role);
     setRole(role2);
+  }
+
+  public void defaultSetUpDiary(Member writer, LocalDate date) {
+    diary = Diary.of("제목1", "내용1", EmotionStatus.NORMAL, date, writer);
+    diary2 = Diary.of("제목2", "내용2", EmotionStatus.GREAT, date, writer);
+
+    setDiary(diary);
+    setDiary2(diary2);
   }
 }
