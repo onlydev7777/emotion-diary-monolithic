@@ -43,8 +43,8 @@ public class SecurityTest extends IntegrationTestSupport {
   Collection<DynamicTest> dynamicTests() {
     return Arrays.asList(
         DynamicTest.dynamicTest("/login 요청 후 Access-Token, Refresh-Token 이 정상 발급 된다.", () -> 로그인_테스트()),
-        DynamicTest.dynamicTest("Access-Token 을 담아서 /ok 페이지에 정상 접속 확인한다.", () -> 로그인_후_토큰인증()),
-        DynamicTest.dynamicTest("토큰 정보 없이(로그인 없이) '/ok' 접속 시 401 오류 발생", () -> 로그인_하지않고_접속시_401_오류())
+        DynamicTest.dynamicTest("Access-Token 을 담아서 /test-ok 페이지에 정상 접속 확인한다.", () -> 로그인_후_토큰인증()),
+        DynamicTest.dynamicTest("토큰 정보 없이(로그인 없이) '/test-ok' 접속 시 401 오류 발생", () -> 로그인_하지않고_접속시_401_오류())
     );
   }
 
@@ -68,7 +68,7 @@ public class SecurityTest extends IntegrationTestSupport {
     refreshToken = jwt.getRefreshToken();
   }
 
-  //  @DisplayName("Access-Token 을 담아서 /ok 페이지에 정상 접속 확인한다.")
+  //  @DisplayName("Access-Token 을 담아서 /test-ok 페이지에 정상 접속 확인한다.")
 //  @Test
   void 로그인_후_토큰인증() throws JsonProcessingException {
     //given
@@ -81,7 +81,7 @@ public class SecurityTest extends IntegrationTestSupport {
     headers.set("Refresh-Token", URLEncoder.encode(refreshToken, StandardCharsets.UTF_8));
     headers.setContentType(MediaType.APPLICATION_JSON);
 
-    ResponseEntity<ApiResult<Payload>> exchange = restTemplate.exchange("/ok", HttpMethod.GET, new HttpEntity<String>(headers),
+    ResponseEntity<ApiResult<Payload>> exchange = restTemplate.exchange("/test-ok", HttpMethod.GET, new HttpEntity<String>(headers),
         new ParameterizedTypeReference<>() {
         });
 
@@ -96,12 +96,12 @@ public class SecurityTest extends IntegrationTestSupport {
 //    assertThat(payload.getRole()).isEqualTo(Role.USER);
   }
 
-  //  @DisplayName("로그인 없이 '/ok' 접속 시 401 오류 발생")
+  //  @DisplayName("로그인 없이 '/test-ok' 접속 시 401 오류 발생")
 //  @Test
   void 로그인_하지않고_접속시_401_오류() {
     //given
     //when
-    ResponseEntity<String> ok = restTemplate.getForEntity("/ok", String.class);
+    ResponseEntity<String> ok = restTemplate.getForEntity("/test-ok", String.class);
 
     //then
     String errorMessage = ok.getBody();

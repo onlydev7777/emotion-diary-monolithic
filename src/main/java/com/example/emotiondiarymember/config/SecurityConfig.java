@@ -58,7 +58,7 @@ public class SecurityConfig {
   private final CustomAccessDeniedHandler customAccessDeniedHandler;
   private final CustomAuthenticationFailureEntryPoint customAuthenticationFailureEntryPoint;
   private final JwtProvider jwtProvider;
-  private final String[] SKIP_LIST = {"/", "/login", "/login-test", "/error"};
+  private final String[] SKIP_LIST = {"/", "/login", "/error"};
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
