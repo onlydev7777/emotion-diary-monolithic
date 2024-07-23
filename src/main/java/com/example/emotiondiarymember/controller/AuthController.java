@@ -37,7 +37,8 @@ public class AuthController {
     Authentication authentication = SecurityContextHolder.getContextHolderStrategy().getContext().getAuthentication();
     if (authentication != null) {
       new SecurityContextLogoutHandler().logout(request, response, authentication);
-      Jwt jwt = (Jwt) authentication.getPrincipal();
+      LoginAuthentication loginAuthentication = (LoginAuthentication) authentication;
+      Jwt jwt = loginAuthentication.getJwt();
       redisService.blackListTokenSave(jwt.getAccessToken(), Boolean.TRUE);
     }
     return ResponseEntity.ok(ApiResult.OK("logout"));

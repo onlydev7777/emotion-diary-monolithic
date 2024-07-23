@@ -29,7 +29,7 @@ public class Diary {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "subject", nullable = false, length = 300)
+  @Column(name = "subject", length = 300)
   private String subject;
   @Column(name = "content", nullable = false, length = 5000)
   private String content;

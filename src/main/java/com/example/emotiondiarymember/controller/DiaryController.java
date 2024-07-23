@@ -38,8 +38,8 @@ public class DiaryController {
     return ResponseEntity.ok(ApiResult.OK(savedDiaryResponse));
   }
 
-  @PatchMapping("/{diaryId}")
-  public ResponseEntity<ApiResult<DiaryResponse>> saveDiary(@RequestBody DiaryUpdateRequest request) {
+  @PatchMapping
+  public ResponseEntity<ApiResult<DiaryResponse>> updateDiary(@RequestBody DiaryUpdateRequest request) {
     DiaryResponse savedDiaryResponse = mapper.toResponse(service.update(mapper.toDto(request)));
     return ResponseEntity.ok(ApiResult.OK(savedDiaryResponse));
   }
