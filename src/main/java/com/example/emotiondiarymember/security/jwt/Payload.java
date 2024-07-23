@@ -14,4 +14,8 @@ public class Payload {
   private String userId;
   private Email email;
 //  private Role role;
+
+  public String getRedisKey() {
+    return this.id + "/" + this.userId + "/" + this.email.getEmail();
+  }
 }

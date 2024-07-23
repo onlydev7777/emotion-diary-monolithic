@@ -43,10 +43,10 @@ public class LoginAuthenticationProvider implements AuthenticationProvider {
       throw new BadCredentialsException("Password Not Matches!");
     }
 
-    String accessToken = jwtProvider.createToken(memberDetails.getId(), memberDetails.getUserId(), memberDetails.getEmail());
-    String refreshToken = jwtProvider.refreshToken(memberDetails.getId(), memberDetails.getUserId());
-    Jwt jwt = new Jwt(accessToken, refreshToken);
     Payload payload = new Payload(memberDetails.getId(), memberDetails.getUserId(), memberDetails.getEmail());
+    String accessToken = jwtProvider.createToken(payload);
+    String refreshToken = jwtProvider.refreshToken(payload);
+    Jwt jwt = new Jwt(accessToken, refreshToken);
 
     return LoginAuthentication.authenticated(payload, jwt, List.of());
   }

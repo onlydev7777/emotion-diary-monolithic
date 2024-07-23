@@ -61,7 +61,7 @@ public class SecurityTest extends IntegrationTestSupport {
     assertThat(jwtResponseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
     Jwt jwt = jwtResponseEntity.getBody();
-    Payload payload = jwtProvider.verifyToken(jwt.getAccessToken());
+    Payload payload = jwtProvider.verifyToken(jwtProvider.getTokenPrefix() + jwt.getAccessToken());
     assertThat(payload.getUserId()).isEqualTo(ID);
 
     accessToken = jwt.getAccessToken();
@@ -77,8 +77,8 @@ public class SecurityTest extends IntegrationTestSupport {
 
     //when
     HttpHeaders headers = new HttpHeaders();
-    headers.set("Authorization", URLEncoder.encode("Bearer " + accessToken, StandardCharsets.UTF_8));
-    headers.set("Refresh-Token", URLEncoder.encode(refreshToken, StandardCharsets.UTF_8));
+    headers.set(jwtProvider.getHeader(), URLEncoder.encode(jwtProvider.getTokenPrefix() + accessToken, StandardCharsets.UTF_8));
+    headers.set(jwtProvider.getRefreshTokenHeader(), URLEncoder.encode(refreshToken, StandardCharsets.UTF_8));
     headers.setContentType(MediaType.APPLICATION_JSON);
 
     ResponseEntity<ApiResult<Payload>> exchange = restTemplate.exchange("/test-ok", HttpMethod.GET, new HttpEntity<String>(headers),

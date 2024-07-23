@@ -1,16 +1,18 @@
 package com.example.emotiondiarymember.security.filter;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+@Slf4j
 public class ReceivingJwtExceptionFilter extends OncePerRequestFilter {
 
   @Override
@@ -18,11 +20,14 @@ public class ReceivingJwtExceptionFilter extends OncePerRequestFilter {
       throws ServletException, IOException {
     try {
       filterChain.doFilter(request, response);
-    } catch (AuthenticationException ae) {  // 인증 오류
-      sendError(response, HttpServletResponse.SC_UNAUTHORIZED, ae.getMessage());
-    } catch (AccessDeniedException ade) {   // 인가 오류
-      sendError(response, HttpServletResponse.SC_FORBIDDEN, ade.getMessage());
-    } catch (RuntimeException re) {         // 런타임 오류
+    } catch (ExpiredJwtException eje) { // JWT 만료 오류
+      log.error(eje.getMessage(), eje);
+      sendError(response, HttpServletResponse.SC_UNAUTHORIZED, "Access-Token is expired");
+    } catch (JwtException je) {  // JWT 인증 오류
+      log.error(je.getMessage(), je);
+      sendError(response, HttpServletResponse.SC_UNAUTHORIZED, je.getMessage());
+    } catch (RuntimeException re) {
+      log.error(re.getMessage(), re);// 런타임 오류
       sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, re.getMessage());
     }
   }

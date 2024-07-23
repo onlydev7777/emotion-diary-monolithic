@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.example.emotiondiarymember.IntegrationTestSupport;
 import com.example.emotiondiarymember.constant.SocialType;
 import com.example.emotiondiarymember.entity.Member;
+import com.example.emotiondiarymember.redis.RedisService;
 import com.example.emotiondiarymember.repository.MemberRepository;
 import com.example.emotiondiarymember.security.authentication.LoginAuthentication;
 import com.example.emotiondiarymember.security.authentication.LoginRequest;
@@ -29,6 +30,8 @@ class LoginAuthenticationProviderTest extends IntegrationTestSupport {
   private JwtProvider jwtProvider;
   @Autowired
   private MemberRepository memberRepository;
+  @Autowired
+  private RedisService redisService;
 
   @DisplayName("로그인 성공 시 authentication.getPrincipal 에 Token 값을 담고 있는 Jwt 객체가 담긴다.")
   @Test
@@ -54,7 +57,7 @@ class LoginAuthenticationProviderTest extends IntegrationTestSupport {
 //    assertThat(authoritiesNames).containsExactly(Role.USER.getAuthority());
 
     Jwt jwt = authenticate.getJwt();
-    Payload payload = jwtProvider.verifyToken(jwt.getAccessToken());
+    Payload payload = jwtProvider.verifyToken(jwtProvider.getTokenPrefix() + jwt.getAccessToken());
     Member findMember = memberRepository.findByUserIdAndSocialType(userId, SocialType.NONE)
         .orElseThrow();
 

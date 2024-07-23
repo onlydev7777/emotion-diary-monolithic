@@ -1,8 +1,8 @@
 package com.example.emotiondiarymember.error;
 
-import org.springframework.security.core.AuthenticationException;
+import io.jsonwebtoken.JwtException;
 
-public class CustomAuthenticationException extends AuthenticationException {
+public class CustomAuthenticationException extends JwtException {
 
   public CustomAuthenticationException(String msg, Throwable cause) {
     super(msg, cause);

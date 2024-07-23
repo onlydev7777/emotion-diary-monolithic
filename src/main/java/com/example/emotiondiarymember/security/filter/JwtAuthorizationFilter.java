@@ -1,17 +1,16 @@
 package com.example.emotiondiarymember.security.filter;
 
-import com.example.emotiondiarymember.error.CustomAuthenticationException;
+import com.example.emotiondiarymember.redis.RedisService;
 import com.example.emotiondiarymember.security.authentication.LoginAuthentication;
 import com.example.emotiondiarymember.security.jwt.Jwt;
 import com.example.emotiondiarymember.security.jwt.JwtProvider;
 import com.example.emotiondiarymember.security.jwt.Payload;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import org.springframework.security.core.Authentication;
@@ -20,14 +19,14 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
-  private final static String HEADER_NAME = "Authorization";
-  private final static String TOKEN_PREFIX = "Bearer ";
   private final String[] skipUrlList;
+  private final RedisService redisService;
   private final JwtProvider jwtProvider;
 
 
-  public JwtAuthorizationFilter(String[] SKIP_LIST, JwtProvider jwtProvider) {
+  public JwtAuthorizationFilter(String[] SKIP_LIST, RedisService redisService, JwtProvider jwtProvider) {
     this.skipUrlList = SKIP_LIST;
+    this.redisService = redisService;
     this.jwtProvider = jwtProvider;
   }
 
@@ -43,8 +42,13 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
       return;
     }
 
-    String token = resolveToken(request);
-    String refreshToken = request.getHeader("Refresh-Token");
+    String token = request.getHeader(jwtProvider.getHeader());
+    String refreshToken = request.getHeader(jwtProvider.getRefreshTokenHeader());
+
+    if (redisService.blackListTokenGet(token)) {
+      throw new JwtException("Token is blacklisted");
+    }
+    
     Payload payload = jwtProvider.verifyToken(token);
     Jwt jwt = new Jwt(token, refreshToken);
 
@@ -52,19 +56,5 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     SecurityContextHolder.getContext().setAuthentication(authenticated);
 
     filterChain.doFilter(request, response);
-  }
-
-  private String resolveToken(HttpServletRequest request) {
-    String bearerToken = request.getHeader(HEADER_NAME);
-    if (bearerToken == null) {
-      throw new CustomAuthenticationException("Token is Not Empty!");
-    }
-
-    String decodedToken = URLDecoder.decode(bearerToken, StandardCharsets.UTF_8);
-    if (decodedToken.startsWith(TOKEN_PREFIX)) {
-      return decodedToken.substring(7);
-    }
-
-    throw new CustomAuthenticationException("Invalid Prefix Token!");
   }
 }

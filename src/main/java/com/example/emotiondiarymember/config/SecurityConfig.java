@@ -1,5 +1,6 @@
 package com.example.emotiondiarymember.config;
 
+import com.example.emotiondiarymember.redis.RedisService;
 import com.example.emotiondiarymember.security.authentication.handler.CustomAccessDeniedHandler;
 import com.example.emotiondiarymember.security.authentication.handler.CustomAuthenticationFailureEntryPoint;
 import com.example.emotiondiarymember.security.authentication.handler.LoginFailureHandler;
@@ -7,6 +8,7 @@ import com.example.emotiondiarymember.security.authentication.handler.LoginSucce
 import com.example.emotiondiarymember.security.authentication.provider.LoginAuthenticationProvider;
 import com.example.emotiondiarymember.security.filter.JwtAuthorizationFilter;
 import com.example.emotiondiarymember.security.filter.LoginRequestFilter;
+import com.example.emotiondiarymember.security.filter.ReceivingJwtExceptionFilter;
 import com.example.emotiondiarymember.security.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -58,7 +60,8 @@ public class SecurityConfig {
   private final CustomAccessDeniedHandler customAccessDeniedHandler;
   private final CustomAuthenticationFailureEntryPoint customAuthenticationFailureEntryPoint;
   private final JwtProvider jwtProvider;
-  private final String[] SKIP_LIST = {"/", "/login", "/error"};
+  private final RedisService redisService;
+  private final String[] SKIP_LIST = {"/", "/login", "/auth/refresh-token", "/error"};
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -83,8 +86,8 @@ public class SecurityConfig {
             .authenticationEntryPoint(customAuthenticationFailureEntryPoint)
         )
         .addFilterBefore(loginRequestFilter(authenticationManager), UsernamePasswordAuthenticationFilter.class)
-        .addFilterBefore(jwtAuthorizationFilter(), AuthorizationFilter.class);
-//        .addFilterBefore(new ReceivingJwtExceptionFilter(), JwtAuthorizationFilter.class);
+        .addFilterBefore(jwtAuthorizationFilter(), AuthorizationFilter.class)
+        .addFilterBefore(new ReceivingJwtExceptionFilter(), JwtAuthorizationFilter.class);
 
 //    http
 //        .oauth2Login(oauth2 -> oauth2
@@ -99,14 +102,14 @@ public class SecurityConfig {
   }
 
   public JwtAuthorizationFilter jwtAuthorizationFilter() {
-    JwtAuthorizationFilter jwtAuthenticationFilter = new JwtAuthorizationFilter(SKIP_LIST, jwtProvider);
+    JwtAuthorizationFilter jwtAuthenticationFilter = new JwtAuthorizationFilter(SKIP_LIST, redisService, jwtProvider);
     return jwtAuthenticationFilter;
   }
 
   public LoginRequestFilter loginRequestFilter(AuthenticationManager authenticationManager) {
     LoginRequestFilter loginRequestFilter = new LoginRequestFilter("/login");
     loginRequestFilter.setAuthenticationManager(authenticationManager);
-    loginRequestFilter.setAuthenticationSuccessHandler(new LoginSuccessHandler());
+    loginRequestFilter.setAuthenticationSuccessHandler(new LoginSuccessHandler(redisService, jwtProvider));
     loginRequestFilter.setAuthenticationFailureHandler(new LoginFailureHandler());
     return loginRequestFilter;
   }
