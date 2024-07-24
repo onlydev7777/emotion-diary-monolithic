@@ -2,6 +2,7 @@ package com.example.emotiondiarymember.controller;
 
 import com.example.emotiondiarymember.controller.request.DiaryRequest;
 import com.example.emotiondiarymember.controller.request.DiaryUpdateRequest;
+import com.example.emotiondiarymember.controller.response.DeleteResponse;
 import com.example.emotiondiarymember.controller.response.DiaryResponse;
 import com.example.emotiondiarymember.error.ApiResult;
 import com.example.emotiondiarymember.mapper.DiaryMapper;
@@ -10,8 +11,10 @@ import com.example.emotiondiarymember.service.DiaryService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,6 +45,12 @@ public class DiaryController {
   public ResponseEntity<ApiResult<DiaryResponse>> updateDiary(@RequestBody DiaryUpdateRequest request) {
     DiaryResponse savedDiaryResponse = mapper.toResponse(service.update(mapper.toDto(request)));
     return ResponseEntity.ok(ApiResult.OK(savedDiaryResponse));
+  }
+
+  @DeleteMapping("/{id}")
+  public ResponseEntity<ApiResult<DeleteResponse>> deleteDiary(@PathVariable("id") Long id) {
+    service.deleteById(id);
+    return ResponseEntity.ok(ApiResult.OK(new DeleteResponse(id)));
   }
 
   @GetMapping("/month-list")

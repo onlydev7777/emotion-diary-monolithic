@@ -6,6 +6,7 @@ import com.example.emotiondiarymember.IntegrationTestSupport;
 import com.example.emotiondiarymember.constant.SocialType;
 import com.example.emotiondiarymember.error.ApiResult;
 import com.example.emotiondiarymember.security.authentication.LoginRequest;
+import com.example.emotiondiarymember.security.authentication.LoginResponse;
 import com.example.emotiondiarymember.security.jwt.Jwt;
 import com.example.emotiondiarymember.security.jwt.JwtProvider;
 import com.example.emotiondiarymember.security.jwt.Payload;
@@ -54,13 +55,14 @@ public class SecurityTest extends IntegrationTestSupport {
     LoginRequest request = new LoginRequest(ID, PASSWORD, SOCIAL_TYPE);
 
     //when
-    ResponseEntity<Jwt> jwtResponseEntity = restTemplate.postForEntity("/login",
-        request, Jwt.class);
+    ResponseEntity<LoginResponse> jwtResponseEntity = restTemplate.postForEntity("/login",
+        request, LoginResponse.class);
 
     //then
     assertThat(jwtResponseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-    Jwt jwt = jwtResponseEntity.getBody();
+    LoginResponse loginResponse = jwtResponseEntity.getBody();
+    Jwt jwt = loginResponse.getJwt();
     Payload payload = jwtProvider.verifyToken(jwtProvider.getTokenPrefix() + jwt.getAccessToken());
     assertThat(payload.getUserId()).isEqualTo(ID);
 

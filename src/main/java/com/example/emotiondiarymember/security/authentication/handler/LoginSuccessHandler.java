@@ -2,6 +2,7 @@ package com.example.emotiondiarymember.security.authentication.handler;
 
 import com.example.emotiondiarymember.redis.RedisService;
 import com.example.emotiondiarymember.security.authentication.LoginAuthentication;
+import com.example.emotiondiarymember.security.authentication.LoginResponse;
 import com.example.emotiondiarymember.security.jwt.Jwt;
 import com.example.emotiondiarymember.security.jwt.JwtProvider;
 import com.example.emotiondiarymember.security.jwt.Payload;
@@ -41,8 +42,9 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     response.setHeader(jwtProvider.getHeader(), jwtProvider.getTokenPrefix() + jwt.getAccessToken());
     response.setHeader(jwtProvider.getRefreshTokenHeader(), jwtProvider.getTokenPrefix() + jwt.getRefreshToken());
+    LoginResponse loginResponse = new LoginResponse(jwt, payload.getId());
     PrintWriter writer = response.getWriter();
-    writer.println(new ObjectMapper().writeValueAsString(jwt));
+    writer.println(new ObjectMapper().writeValueAsString(loginResponse));
     writer.flush();
     writer.close();
   }
