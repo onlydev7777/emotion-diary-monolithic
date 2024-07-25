@@ -32,7 +32,7 @@ public class MemberController {
     return ResponseEntity.ok(ApiResult.OK(mapper.toResponse(memberDto)));
   }
 
-  @PostMapping
+  @PostMapping("/signup")
   public ResponseEntity<ApiResult<MemberJoinResponse>> joinMember(@RequestBody MemberJoinRequest request) {
     MemberDto savedMemberDto = service.save(mapper.toDto(request, passwordEncoder));
     return ResponseEntity.ok(ApiResult.OK(mapper.toResponse(savedMemberDto)));

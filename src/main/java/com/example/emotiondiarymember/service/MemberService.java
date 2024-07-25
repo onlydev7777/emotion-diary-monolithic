@@ -25,9 +25,12 @@ public class MemberService {
   @Transactional
   public MemberDto save(MemberDto dto) {
     Member savedMember = repository.save(mapper.toEntity(dto));
-    roleRepository.findAllById(dto.getRoleIds()).forEach(
-        role -> memberRoleRepository.save(MemberRole.of(savedMember, role))
-    );
+
+    if (dto.getRoleIds() != null && !dto.getRoleIds().isEmpty()) {
+      roleRepository.findAllById(dto.getRoleIds()).forEach(
+          role -> memberRoleRepository.save(MemberRole.of(savedMember, role))
+      );
+    }
 
     return mapper.toDto(savedMember, dto.getRoleIds());
   }

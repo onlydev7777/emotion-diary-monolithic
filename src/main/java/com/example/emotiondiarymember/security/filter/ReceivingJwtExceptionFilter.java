@@ -26,9 +26,6 @@ public class ReceivingJwtExceptionFilter extends OncePerRequestFilter {
     } catch (JwtException je) {  // JWT 인증 오류
       log.error(je.getMessage(), je);
       sendError(response, HttpServletResponse.SC_UNAUTHORIZED, je.getMessage());
-    } catch (RuntimeException re) {
-      log.error(re.getMessage(), re);// 런타임 오류
-      sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, re.getMessage());
     }
   }
 

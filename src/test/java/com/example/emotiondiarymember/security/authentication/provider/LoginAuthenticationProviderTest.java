@@ -61,7 +61,7 @@ class LoginAuthenticationProviderTest extends IntegrationTestSupport {
     Member findMember = memberRepository.findByUserIdAndSocialType(userId, SocialType.NONE)
         .orElseThrow();
 
-    assertThat(payload.getUserId()).isEqualTo(loginRequest.getId());
+    assertThat(payload.getUserId()).isEqualTo(loginRequest.getUserId());
     assertThat(payload.getEmail()).isEqualTo(findMember.getEmail());
     assertThat(payload.getId()).isEqualTo(findMember.getId());
 //    assertThat(payload.getRole()).isEqualTo(findMember.getRole());

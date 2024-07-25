@@ -22,9 +22,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
+@RequestMapping("/auth")
 @RestController
 public class AuthController {
 
@@ -32,7 +34,7 @@ public class AuthController {
   private final RedisService redisService;
   private final MemberRepository memberRepository;
 
-  @GetMapping("/auth/logout")
+  @GetMapping("/logout")
   public ResponseEntity<ApiResult<String>> logout(HttpServletRequest request, HttpServletResponse response) {
     Authentication authentication = SecurityContextHolder.getContextHolderStrategy().getContext().getAuthentication();
     if (authentication != null) {
@@ -44,7 +46,7 @@ public class AuthController {
     return ResponseEntity.ok(ApiResult.OK("logout"));
   }
 
-  @PostMapping("/auth/refresh-token")
+  @PostMapping("/refresh-token")
   public void refreshToken(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
     //1. validate refresh token

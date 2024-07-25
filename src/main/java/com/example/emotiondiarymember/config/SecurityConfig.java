@@ -61,7 +61,7 @@ public class SecurityConfig {
   private final CustomAuthenticationFailureEntryPoint customAuthenticationFailureEntryPoint;
   private final JwtProvider jwtProvider;
   private final RedisService redisService;
-  private final String[] SKIP_LIST = {"/", "/login", "/auth/refresh-token", "/error"};
+  private final String[] SKIP_LIST = {"/", "/login", "/member/signup", "/auth/refresh-token", "/error"};
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

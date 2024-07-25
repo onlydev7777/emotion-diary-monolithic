@@ -34,7 +34,7 @@ public class LoginAuthentication extends AbstractAuthenticationToken {
   }
 
   public static LoginAuthentication unauthenticated(LoginRequest request) {
-    String principal = request.getId() + "^" + request.getSocialType().name();
+    String principal = request.getUserId() + "^" + request.getSocialType().name();
     String credentials = request.getPassword();
 
     validateCheck(principal, credentials);

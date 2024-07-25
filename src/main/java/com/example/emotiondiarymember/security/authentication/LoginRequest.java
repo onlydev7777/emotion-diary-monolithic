@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class LoginRequest {
 
-  private String id;
+  private String userId;
   private String password;
   private SocialType socialType;
 }
