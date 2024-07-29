@@ -43,15 +43,34 @@ public class SecurityTest extends IntegrationTestSupport {
   @TestFactory
   Collection<DynamicTest> dynamicTests() {
     return Arrays.asList(
-        DynamicTest.dynamicTest("/login 요청 후 Access-Token, Refresh-Token 이 정상 발급 된다.", () -> 로그인_테스트()),
+        DynamicTest.dynamicTest("/login 요청 후 Access-Token, Refresh-Token 이 정상 발급 된다.", () -> 로그인()),
         DynamicTest.dynamicTest("Access-Token 을 담아서 /auth/test-ok 페이지에 정상 접속 확인한다.", () -> 로그인_후_토큰인증()),
         DynamicTest.dynamicTest("토큰 정보 없이(로그인 없이) '/auth/test-ok' 접속 시 401 오류 발생", () -> 로그인_하지않고_접속시_401_오류())
     );
   }
 
+  @TestFactory
+  Collection<DynamicTest> dynamicTests2() {
+    return Arrays.asList(
+        DynamicTest.dynamicTest("/login 요청 후 Access-Token, Refresh-Token 이 정상 발급 된다.", () -> 로그인()),
+        DynamicTest.dynamicTest("/logout 요청이 정상처리 된다.", () -> 로그아웃()),
+        DynamicTest.dynamicTest("/logout 요청이 완료 된 후 해당 Access-Token 으로는 접속이 불가하다.", () -> 로그아웃_이후_접속불가())
+    );
+  }
+
+  @TestFactory
+  Collection<DynamicTest> dynamicTests3() {
+    return Arrays.asList(
+        DynamicTest.dynamicTest("/login 요청 후 Access-Token, Refresh-Token 이 정상 발급 된다.", () -> 로그인()),
+        DynamicTest.dynamicTest("Refresh-Token 헤더에 Refresh-Token 을 담아서 /auth/refresh-token 요청 시 새로운 access-token이 발급된다.", () -> 리프레시_토큰으로_새토큰_발급()),
+        DynamicTest.dynamicTest("새로 발급받은 Access-Token으로 정상접속 가능하다.", () -> 로그인_후_토큰인증())
+    );
+  }
+
+
   //  @DisplayName("/login 요청 후 Access-Token, Refresh-Token 이 정상 발급 된다.")
 //  @Test
-  public void 로그인_테스트() {
+  void 로그인() {
     LoginRequest request = new LoginRequest(ID, PASSWORD, SOCIAL_TYPE);
 
     //when
@@ -109,5 +128,81 @@ public class SecurityTest extends IntegrationTestSupport {
     String errorMessage = ok.getBody();
     assertThat(ok.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     assertThat(errorMessage).isEqualTo("Token is Not Empty!");
+  }
+
+  void 로그아웃() {
+    //given
+    HttpHeaders headers = new HttpHeaders();
+    headers.set(jwtProvider.getHeader(), URLEncoder.encode(jwtProvider.getTokenPrefix() + accessToken, StandardCharsets.UTF_8));
+    headers.set(jwtProvider.getRefreshTokenHeader(), URLEncoder.encode(refreshToken, StandardCharsets.UTF_8));
+    headers.setContentType(MediaType.APPLICATION_JSON);
+
+    //when
+    ResponseEntity<ApiResult<String>> logoutOk = restTemplate.exchange("/auth/logout", HttpMethod.GET, new HttpEntity<String>(headers),
+        new ParameterizedTypeReference<>() {
+        });
+
+    //then
+    assertThat(logoutOk.getStatusCode()).isEqualTo(HttpStatus.OK);
+    ApiResult<String> apiResult = logoutOk.getBody();
+    String result = apiResult.getResponse();
+
+    assertThat(apiResult.isSuccess()).isTrue();
+    assertThat(apiResult.getError()).isNull();
+    assertThat(result).isEqualTo("logout");
+  }
+
+  void 로그아웃_이후_접속불가() throws InterruptedException {
+    Thread.sleep(300);
+    //given
+    System.out.println("accessToken = " + accessToken);
+    System.out.println("refreshToken = " + refreshToken);
+
+    //when
+    //then
+    HttpHeaders headers = new HttpHeaders();
+    headers.set(jwtProvider.getHeader(), URLEncoder.encode(jwtProvider.getTokenPrefix() + accessToken, StandardCharsets.UTF_8));
+    headers.set(jwtProvider.getRefreshTokenHeader(), URLEncoder.encode(refreshToken, StandardCharsets.UTF_8));
+    headers.setContentType(MediaType.APPLICATION_JSON);
+
+    ResponseEntity<String> exchange = restTemplate.exchange("/auth/test-ok", HttpMethod.GET, new HttpEntity<String>(headers),
+        new ParameterizedTypeReference<>() {
+        });
+
+    String responseBody = exchange.getBody();
+
+    assertThat(exchange.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    assertThat(responseBody).isEqualTo("Token is blacklisted");
+  }
+
+  void 리프레시_토큰으로_새토큰_발급() throws InterruptedException {
+    Thread.sleep(300);
+    //given
+    System.out.println("prev-accessToken = " + accessToken);
+    System.out.println("prev-refreshToken = " + refreshToken);
+
+    //when
+    //then
+    HttpHeaders headers = new HttpHeaders();
+    headers.set(jwtProvider.getHeader(), URLEncoder.encode(jwtProvider.getTokenPrefix() + accessToken, StandardCharsets.UTF_8));
+    headers.set(jwtProvider.getRefreshTokenHeader(), URLEncoder.encode(refreshToken, StandardCharsets.UTF_8));
+    headers.setContentType(MediaType.APPLICATION_JSON);
+
+    ResponseEntity<LoginResponse> exchange = restTemplate.exchange("/auth/refresh-token", HttpMethod.POST, new HttpEntity<String>(headers),
+        new ParameterizedTypeReference<>() {
+        });
+
+    assertThat(exchange.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+    LoginResponse loginResponse = exchange.getBody();
+    Jwt jwt = loginResponse.getJwt();
+    Payload payload = jwtProvider.verifyToken(jwtProvider.getTokenPrefix() + jwt.getAccessToken());
+    assertThat(payload.getUserId()).isEqualTo(ID);
+
+    accessToken = jwt.getAccessToken();
+    refreshToken = jwt.getRefreshToken();
+
+    System.out.println("after-accessToken = " + accessToken);
+    System.out.println("after-refreshToken = " + refreshToken);
   }
 }
