@@ -17,16 +17,13 @@ public class LoginRequestFilter extends AbstractAuthenticationProcessingFilter {
     super(defaultFilterProcessesUrl);
   }
 
-  /**
+  /*
    * '/login' 으로 들어오는 요청일 경우
-   *   1. LoginRequest 로 파싱
-   *   2. LoginAuthentication(미인증 상태) 으로 변환
-   *   3. Authentication 에게 인증 위임
-   *      : AuthenticationManager(ProviderManager) >> Provider(LoginAuthenticationProvider) 에서 인증 시도
-   * @return
-   * @throws AuthenticationException
-   * @throws IOException
-   * @throws ServletException
+   *
+   * 1. LoginRequest 로 파싱
+   * 2. LoginAuthentication(미인증 상태) 으로 변환
+   * 3. Authentication 에게 인증 위임 : AuthenticationManager(ProviderManager) >> Provider(LoginAuthenticationProvider) 에서 인증 시도
+   *
    */
   @Override
   public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)

@@ -55,9 +55,8 @@ public class JwtProvider {
         .compact();
   }
 
-  public String refreshToken(Payload payload) {
+  public String refreshToken(String subject) {
     SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
-    String subject = payload.getRedisKey();
 
     return Jwts.builder()
         .subject(subject)

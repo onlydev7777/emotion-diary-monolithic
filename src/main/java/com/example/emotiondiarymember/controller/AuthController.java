@@ -6,7 +6,7 @@ import com.example.emotiondiarymember.redis.RedisService;
 import com.example.emotiondiarymember.repository.MemberRepository;
 import com.example.emotiondiarymember.security.authentication.LoginAuthentication;
 import com.example.emotiondiarymember.security.authentication.handler.LoginSuccessHandler;
-import com.example.emotiondiarymember.security.jwt.Jwt;
+import com.example.emotiondiarymember.security.dto.MemberDetails;
 import com.example.emotiondiarymember.security.jwt.JwtProvider;
 import com.example.emotiondiarymember.security.jwt.Payload;
 import io.jsonwebtoken.JwtException;
@@ -39,9 +39,8 @@ public class AuthController {
     Authentication authentication = SecurityContextHolder.getContextHolderStrategy().getContext().getAuthentication();
     if (authentication != null) {
       new SecurityContextLogoutHandler().logout(request, response, authentication);
-      LoginAuthentication loginAuthentication = (LoginAuthentication) authentication;
-      Jwt jwt = loginAuthentication.getJwt();
-      redisService.blackListTokenSave(jwt.getAccessToken(), Boolean.TRUE);
+      String accessToken = request.getHeader(jwtProvider.getHeader());
+      redisService.blackListTokenSave(accessToken, Boolean.TRUE);
     }
     return ResponseEntity.ok(ApiResult.OK("logout"));
   }
@@ -66,14 +65,12 @@ public class AuthController {
     String requestAccessToken = jwtProvider.resolveToken(request.getHeader(jwtProvider.getHeader()));
     redisService.blackListTokenSave(requestAccessToken, true);
 
-    //4. create new token and refresh token
-    Payload payload = new Payload(member.getId(), member.getUserId(), member.getEmail());
-    String newAccessToken = jwtProvider.createToken(payload);
-    String newRefreshToken = jwtProvider.refreshToken(payload);
-    Jwt jwt = new Jwt(newAccessToken, newRefreshToken);
+    //4. create payload
+    Payload payload = Payload.of(MemberDetails.of(member));
 
     //5. set new token and refresh token to response header
-    LoginAuthentication refreshAuthentication = LoginAuthentication.authenticated(payload, jwt, List.of());
+    LoginAuthentication refreshAuthentication = LoginAuthentication.authenticated(payload, List.of());
+    SecurityContextHolder.getContext().setAuthentication(refreshAuthentication);
     new LoginSuccessHandler(redisService, jwtProvider).onAuthenticationSuccess(request, response, refreshAuthentication);
   }
 

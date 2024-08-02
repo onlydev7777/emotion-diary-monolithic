@@ -1,5 +1,7 @@
 package com.example.emotiondiarymember.security.dto;
 
+import com.example.emotiondiarymember.constant.SocialType;
+import com.example.emotiondiarymember.dto.MemberDto;
 import com.example.emotiondiarymember.entity.Member;
 import com.example.emotiondiarymember.entity.embeddable.Email;
 import java.util.Collection;
@@ -16,6 +18,7 @@ public class MemberDetails implements UserDetails {
   private String userId;
   private String password;
   private Email email;
+  private SocialType socialType;
 //  private Role role;
 
   @Override
@@ -55,6 +58,11 @@ public class MemberDetails implements UserDetails {
   }
 
   public static MemberDetails of(Member member) {
-    return new MemberDetails(member.getId(), member.getUserId(), member.getPassword().getPassword(), member.getEmail());
+    return new MemberDetails(member.getId(), member.getUserId(), member.getPassword().getPassword(), member.getEmail(), member.getSocialType());
+  }
+
+  public static MemberDetails of(MemberDto memberDto) {
+    return new MemberDetails(memberDto.getId(), memberDto.getUserId(), memberDto.getPassword().getPassword(), memberDto.getEmail(),
+        memberDto.getSocialType());
   }
 }

@@ -1,5 +1,6 @@
 package com.example.emotiondiarymember.service;
 
+import com.example.emotiondiarymember.constant.SocialType;
 import com.example.emotiondiarymember.dto.MemberDto;
 import com.example.emotiondiarymember.entity.Member;
 import com.example.emotiondiarymember.entity.auth.MemberRole;
@@ -7,6 +8,7 @@ import com.example.emotiondiarymember.mapper.MemberMapper;
 import com.example.emotiondiarymember.repository.MemberRepository;
 import com.example.emotiondiarymember.repository.MemberRoleRepository;
 import com.example.emotiondiarymember.repository.RoleRepository;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -49,5 +51,20 @@ public class MemberService {
     Member member = repository.findById(memberId)
         .orElseThrow();
     repository.delete(member);
+  }
+
+  public Optional<MemberDto> findByUserIdAndSocialType(String userId, SocialType socialType) {
+    Optional<Member> findMember = repository.findByUserIdAndSocialType(userId, socialType);
+    if (findMember.isEmpty()) {
+      return Optional.empty();
+    }
+    
+    Member member = findMember.get();
+
+    return Optional.of(
+        mapper.toDto(member, member.getMemberRoles().stream()
+            .map(mr -> mr.getRole().getId())
+            .collect(Collectors.toSet()))
+    );
   }
 }

@@ -9,7 +9,6 @@ import com.example.emotiondiarymember.redis.RedisService;
 import com.example.emotiondiarymember.repository.MemberRepository;
 import com.example.emotiondiarymember.security.authentication.LoginAuthentication;
 import com.example.emotiondiarymember.security.authentication.LoginRequest;
-import com.example.emotiondiarymember.security.jwt.Jwt;
 import com.example.emotiondiarymember.security.jwt.JwtProvider;
 import com.example.emotiondiarymember.security.jwt.Payload;
 import com.example.emotiondiarymember.security.service.LoginService;
@@ -41,7 +40,7 @@ class LoginAuthenticationProviderTest extends IntegrationTestSupport {
     final String password = "qwer1234!";
     final SocialType socialType = SocialType.NONE;
 
-    LoginAuthenticationProvider loginAuthenticationProvider = new LoginAuthenticationProvider(loginService, passwordEncoder, jwtProvider);
+    LoginAuthenticationProvider loginAuthenticationProvider = new LoginAuthenticationProvider(loginService, passwordEncoder);
     LoginRequest loginRequest = new LoginRequest(userId, password, socialType);
     LoginAuthentication unauthenticated = LoginAuthentication.unauthenticated(loginRequest);
 
@@ -56,8 +55,9 @@ class LoginAuthenticationProviderTest extends IntegrationTestSupport {
     assertThat(authenticate.getPrincipal()).isInstanceOf(Payload.class);
 //    assertThat(authoritiesNames).containsExactly(Role.USER.getAuthority());
 
-    Jwt jwt = authenticate.getJwt();
-    Payload payload = jwtProvider.verifyToken(jwtProvider.getTokenPrefix() + jwt.getAccessToken());
+//    Jwt jwt = authenticate.getJwt();
+//    Payload payload = jwtProvider.verifyToken(jwtProvider.getTokenPrefix() + jwt.getAccessToken());
+    Payload payload = (Payload) authenticate.getPrincipal();
     Member findMember = memberRepository.findByUserIdAndSocialType(userId, SocialType.NONE)
         .orElseThrow();
 

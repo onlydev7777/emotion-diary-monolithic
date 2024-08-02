@@ -31,7 +31,7 @@ public class Password {
   private void validatePassword(String password) {
     Matcher matcher = PASSWORD_PATTERN_DEFAULT.matcher(password);
     if (!matcher.find()) {
-      throw new IllegalArgumentException("패스워드는 8자 이상 16자 이하 특수문자 1개 이상 포함되어야 합니다.");
+      throw new IllegalArgumentException("유효하지 않은 패스워드 형식입니다.");
     }
   }
 
