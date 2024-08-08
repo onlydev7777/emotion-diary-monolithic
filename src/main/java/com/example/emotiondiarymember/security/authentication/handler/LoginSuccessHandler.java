@@ -6,12 +6,16 @@ import com.example.emotiondiarymember.security.jwt.Jwt;
 import com.example.emotiondiarymember.security.jwt.JwtProvider;
 import com.example.emotiondiarymember.security.jwt.Payload;
 import com.example.emotiondiarymember.security.util.TokenUtil;
+import com.example.emotiondiarymember.util.CookieUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
@@ -39,10 +43,6 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
   @Override
   public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
       throws IOException, ServletException {
-//    LoginAuthentication loginAuthentication = (LoginAuthentication) authentication;
-//    Jwt jwt = loginAuthentication.getJwt();
-//    Payload payload = (Payload) loginAuthentication.getPrincipal();
-
     Payload payload = TokenUtil.getPayload();
     String accessToken = jwtProvider.createToken(payload);
     String refreshToken = jwtProvider.refreshToken(payload.getRedisKey());
@@ -51,10 +51,49 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
     redisService.accessTokenSave(payload.getRedisKey(), jwt.getAccessToken());
     redisService.refreshTokenSave(payload.getRedisKey(), jwt.getRefreshToken());
 
+    int refreshTokenMaxAge = (int) jwtProvider.getRefreshExpirationTime() / 1000;
+
+    Cookie refreshTokenCookie = CookieUtil.createCookie(
+        jwtProvider.getRefreshTokenHeader(),
+        URLEncoder.encode(refreshToken, StandardCharsets.UTF_8),
+        refreshTokenMaxAge,
+        true,
+        false,
+        "/"
+    );
+
+    CookieUtil.addCookie(response, refreshTokenCookie);
+
+    if (TokenUtil.isInitSocialLogin()) {
+      int accessTokenMaxAge = (int) jwtProvider.getExpirationTime() / 1000;
+
+      Cookie accessTokenCookie = CookieUtil.createCookie(
+          jwtProvider.getAccessTokenHeader(),
+          URLEncoder.encode(jwtProvider.getTokenPrefix() + accessToken, StandardCharsets.UTF_8),
+          accessTokenMaxAge,
+          false,
+          false,
+          "/"
+      );
+
+      Cookie idCookie = CookieUtil.createCookie(
+          "id",
+          String.valueOf(payload.getId()),
+          accessTokenMaxAge,
+          false,
+          false,
+          "/"
+      );
+
+      CookieUtil.addCookie(response, accessTokenCookie, idCookie);
+      response.sendRedirect("http://localhost:8081/oauth2-signin-success");
+      return;
+    }
+
     response.setStatus(HttpStatus.OK.value());
     response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
 
-    response.setHeader(jwtProvider.getHeader(), jwtProvider.getTokenPrefix() + jwt.getAccessToken());
+    response.setHeader(jwtProvider.getAccessTokenHeader(), jwtProvider.getTokenPrefix() + jwt.getAccessToken());
     response.setHeader(jwtProvider.getRefreshTokenHeader(), jwtProvider.getTokenPrefix() + jwt.getRefreshToken());
     LoginResponse loginResponse = new LoginResponse(jwt, payload.getId());
     PrintWriter writer = response.getWriter();

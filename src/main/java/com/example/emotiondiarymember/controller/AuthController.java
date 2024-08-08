@@ -9,6 +9,7 @@ import com.example.emotiondiarymember.security.authentication.handler.LoginSucce
 import com.example.emotiondiarymember.security.dto.MemberDetails;
 import com.example.emotiondiarymember.security.jwt.JwtProvider;
 import com.example.emotiondiarymember.security.jwt.Payload;
+import com.example.emotiondiarymember.util.CookieUtil;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,8 +40,10 @@ public class AuthController {
     Authentication authentication = SecurityContextHolder.getContextHolderStrategy().getContext().getAuthentication();
     if (authentication != null) {
       new SecurityContextLogoutHandler().logout(request, response, authentication);
-      String accessToken = request.getHeader(jwtProvider.getHeader());
+      String accessToken = jwtProvider.resolveToken(request.getHeader(jwtProvider.getAccessTokenHeader()));
+//      String accessToken = CookieUtil.getCookieValue(request, jwtProvider.getAccessTokenHeader());
       redisService.blackListTokenSave(accessToken, Boolean.TRUE);
+      CookieUtil.deleteCookies(request, response, jwtProvider.getAccessTokenHeader(), jwtProvider.getRefreshTokenHeader(), "id");
     }
     return ResponseEntity.ok(ApiResult.OK("logout"));
   }
@@ -49,7 +52,9 @@ public class AuthController {
   public void refreshToken(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
     //1. validate refresh token
-    String requestRefreshToken = jwtProvider.resolveToken(request.getHeader(jwtProvider.getRefreshTokenHeader()));
+//    String refreshToken = request.getHeader(jwtProvider.getRefreshTokenHeader());
+    String refreshToken = CookieUtil.getCookieValue(request, jwtProvider.getRefreshTokenHeader());
+    String requestRefreshToken = jwtProvider.resolveToken(refreshToken);
     String redisKey = jwtProvider.verifyRefreshToken(requestRefreshToken);
     String findRefreshToken = redisService.refreshTokenGet(redisKey);
     if (!requestRefreshToken.equals(findRefreshToken)) {
@@ -62,13 +67,18 @@ public class AuthController {
         .orElseThrow();
 
     //3. as-is access token to blacklist token
-    String requestAccessToken = jwtProvider.resolveToken(request.getHeader(jwtProvider.getHeader()));
-    redisService.blackListTokenSave(requestAccessToken, true);
+//    String accessToken = request.getHeader(jwtProvider.getAccessTokenHeader());
+//    String accessToken = CookieUtil.getCookieValue(request, jwtProvider.getAccessTokenHeader());
+//    String requestAccessToken = jwtProvider.resolveToken(accessToken);
+//    redisService.blackListTokenSave(requestAccessToken, true);
 
-    //4. create payload
+    //4. delete cookie
+//    CookieUtil.deleteCookies(request, response, jwtProvider.getAccessTokenHeader(), jwtProvider.getRefreshTokenHeader(), "id");
+
+    //5. create payload
     Payload payload = Payload.of(MemberDetails.of(member));
 
-    //5. set new token and refresh token to response header
+    //6. set new token and refresh token to response header
     LoginAuthentication refreshAuthentication = LoginAuthentication.authenticated(payload, List.of());
     SecurityContextHolder.getContext().setAuthentication(refreshAuthentication);
     new LoginSuccessHandler(redisService, jwtProvider).onAuthenticationSuccess(request, response, refreshAuthentication);

@@ -10,12 +10,14 @@ import com.example.emotiondiarymember.security.authentication.LoginResponse;
 import com.example.emotiondiarymember.security.jwt.Jwt;
 import com.example.emotiondiarymember.security.jwt.JwtProvider;
 import com.example.emotiondiarymember.security.jwt.Payload;
+import com.example.emotiondiarymember.util.CookieUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import jakarta.servlet.http.Cookie;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -24,7 +26,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 public class SecurityTest extends IntegrationTestSupport {
@@ -33,8 +34,10 @@ public class SecurityTest extends IntegrationTestSupport {
   private TestRestTemplate restTemplate;
   @Autowired
   private JwtProvider jwtProvider;
-  private String accessToken;
-  private String refreshToken;
+  //  private String accessToken;
+//  private String refreshToken;
+  private Cookie accessTokenCookie;
+  private Cookie refreshTokenCookie;
   //given
   private final static String ID = "test";
   private final static String PASSWORD = "qwer1234!";
@@ -69,7 +72,7 @@ public class SecurityTest extends IntegrationTestSupport {
 
 
   //  @DisplayName("/login 요청 후 Access-Token, Refresh-Token 이 정상 발급 된다.")
-//  @Test
+  @Test
   void 로그인() {
     LoginRequest request = new LoginRequest(ID, PASSWORD, SOCIAL_TYPE);
 
@@ -77,30 +80,41 @@ public class SecurityTest extends IntegrationTestSupport {
     ResponseEntity<LoginResponse> jwtResponseEntity = restTemplate.postForEntity("/login",
         request, LoginResponse.class);
 
+    List<String> cookies = jwtResponseEntity.getHeaders().get("Set-Cookie");
+    this.accessTokenCookie = CookieUtil.getCookieFromCookieHeader(cookies, jwtProvider.getAccessTokenHeader()).orElseThrow();
+    this.refreshTokenCookie = CookieUtil.getCookieFromCookieHeader(cookies, jwtProvider.getRefreshTokenHeader()).orElseThrow();
+
     //then
     assertThat(jwtResponseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(cookies).isNotEmpty();
+    assertThat(cookies).hasSize(3);
 
     LoginResponse loginResponse = jwtResponseEntity.getBody();
     Jwt jwt = loginResponse.getJwt();
-    Payload payload = jwtProvider.verifyToken(jwtProvider.getTokenPrefix() + jwt.getAccessToken());
-    assertThat(payload.getUserId()).isEqualTo(ID);
+    Payload payload = jwtProvider.verifyToken(this.accessTokenCookie.getValue());
 
-    accessToken = jwt.getAccessToken();
-    refreshToken = jwt.getRefreshToken();
+    assertThat(payload.getUserId()).isEqualTo(ID);
+    assertThat(jwt.getAccessToken()).isEqualTo(jwtProvider.resolveToken(this.accessTokenCookie.getValue()));
+    assertThat(jwt.getRefreshToken()).isEqualTo(jwtProvider.resolveToken(this.refreshTokenCookie.getValue()));
+
+//    accessToken = jwt.getAccessToken();
+//    refreshToken = jwt.getRefreshToken();
   }
 
   //  @DisplayName("Access-Token 을 담아서 /auth/test-ok 페이지에 정상 접속 확인한다.")
 //  @Test
   void 로그인_후_토큰인증() throws JsonProcessingException {
     //given
-    System.out.println("accessToken = " + accessToken);
-    System.out.println("refreshToken = " + refreshToken);
+//    System.out.println("accessToken = " + accessToken);
+//    System.out.println("refreshToken = " + refreshToken);
 
     //when
     HttpHeaders headers = new HttpHeaders();
-    headers.set(jwtProvider.getHeader(), URLEncoder.encode(jwtProvider.getTokenPrefix() + accessToken, StandardCharsets.UTF_8));
-    headers.set(jwtProvider.getRefreshTokenHeader(), URLEncoder.encode(refreshToken, StandardCharsets.UTF_8));
-    headers.setContentType(MediaType.APPLICATION_JSON);
+//    headers.set(jwtProvider.getAccessTokenHeader(), URLEncoder.encode(jwtProvider.getTokenPrefix() + accessToken, StandardCharsets.UTF_8));
+//    headers.set(jwtProvider.getRefreshTokenHeader(), URLEncoder.encode(refreshToken, StandardCharsets.UTF_8));
+//    headers.setContentType(MediaType.APPLICATION_JSON);
+
+    headers.addAll(HttpHeaders.COOKIE, CookieUtil.cookiesToList(accessTokenCookie, refreshTokenCookie));
 
     ResponseEntity<ApiResult<Payload>> exchange = restTemplate.exchange("/auth/test-ok", HttpMethod.GET, new HttpEntity<String>(headers),
         new ParameterizedTypeReference<>() {
@@ -133,9 +147,11 @@ public class SecurityTest extends IntegrationTestSupport {
   void 로그아웃() {
     //given
     HttpHeaders headers = new HttpHeaders();
-    headers.set(jwtProvider.getHeader(), URLEncoder.encode(jwtProvider.getTokenPrefix() + accessToken, StandardCharsets.UTF_8));
-    headers.set(jwtProvider.getRefreshTokenHeader(), URLEncoder.encode(refreshToken, StandardCharsets.UTF_8));
-    headers.setContentType(MediaType.APPLICATION_JSON);
+//    headers.set(jwtProvider.getAccessTokenHeader(), URLEncoder.encode(jwtProvider.getTokenPrefix() + accessToken, StandardCharsets.UTF_8));
+//    headers.set(jwtProvider.getRefreshTokenHeader(), URLEncoder.encode(refreshToken, StandardCharsets.UTF_8));
+//    headers.setContentType(MediaType.APPLICATION_JSON);
+
+    headers.addAll(HttpHeaders.COOKIE, CookieUtil.cookiesToList(accessTokenCookie, refreshTokenCookie));
 
     //when
     ResponseEntity<ApiResult<String>> logoutOk = restTemplate.exchange("/auth/logout", HttpMethod.GET, new HttpEntity<String>(headers),
@@ -155,15 +171,17 @@ public class SecurityTest extends IntegrationTestSupport {
   void 로그아웃_이후_접속불가() throws InterruptedException {
     Thread.sleep(300);
     //given
-    System.out.println("accessToken = " + accessToken);
-    System.out.println("refreshToken = " + refreshToken);
+//    System.out.println("accessToken = " + accessToken);
+//    System.out.println("refreshToken = " + refreshToken);
 
     //when
     //then
     HttpHeaders headers = new HttpHeaders();
-    headers.set(jwtProvider.getHeader(), URLEncoder.encode(jwtProvider.getTokenPrefix() + accessToken, StandardCharsets.UTF_8));
-    headers.set(jwtProvider.getRefreshTokenHeader(), URLEncoder.encode(refreshToken, StandardCharsets.UTF_8));
-    headers.setContentType(MediaType.APPLICATION_JSON);
+//    headers.set(jwtProvider.getAccessTokenHeader(), URLEncoder.encode(jwtProvider.getTokenPrefix() + accessToken, StandardCharsets.UTF_8));
+//    headers.set(jwtProvider.getRefreshTokenHeader(), URLEncoder.encode(refreshToken, StandardCharsets.UTF_8));
+//    headers.setContentType(MediaType.APPLICATION_JSON);
+
+    headers.addAll(HttpHeaders.COOKIE, CookieUtil.cookiesToList(accessTokenCookie, refreshTokenCookie));
 
     ResponseEntity<String> exchange = restTemplate.exchange("/auth/test-ok", HttpMethod.GET, new HttpEntity<String>(headers),
         new ParameterizedTypeReference<>() {
@@ -178,31 +196,38 @@ public class SecurityTest extends IntegrationTestSupport {
   void 리프레시_토큰으로_새토큰_발급() throws InterruptedException {
     Thread.sleep(300);
     //given
-    System.out.println("prev-accessToken = " + accessToken);
-    System.out.println("prev-refreshToken = " + refreshToken);
+    System.out.println("prev-accessToken = " + this.accessTokenCookie.getValue());
+    System.out.println("prev-refreshToken = " + this.refreshTokenCookie.getValue());
 
     //when
     //then
     HttpHeaders headers = new HttpHeaders();
-    headers.set(jwtProvider.getHeader(), URLEncoder.encode(jwtProvider.getTokenPrefix() + accessToken, StandardCharsets.UTF_8));
-    headers.set(jwtProvider.getRefreshTokenHeader(), URLEncoder.encode(refreshToken, StandardCharsets.UTF_8));
-    headers.setContentType(MediaType.APPLICATION_JSON);
+//    headers.set(jwtProvider.getAccessTokenHeader(), URLEncoder.encode(jwtProvider.getTokenPrefix() + accessToken, StandardCharsets.UTF_8));
+//    headers.set(jwtProvider.getRefreshTokenHeader(), URLEncoder.encode(refreshToken, StandardCharsets.UTF_8));
+//    headers.setContentType(MediaType.APPLICATION_JSON);
+
+    headers.addAll(HttpHeaders.COOKIE, CookieUtil.cookiesToList(accessTokenCookie, refreshTokenCookie));
 
     ResponseEntity<LoginResponse> exchange = restTemplate.exchange("/auth/refresh-token", HttpMethod.POST, new HttpEntity<String>(headers),
         new ParameterizedTypeReference<>() {
         });
 
     assertThat(exchange.getStatusCode()).isEqualTo(HttpStatus.OK);
+    List<String> cookies = exchange.getHeaders().get("Set-Cookie");
+    this.accessTokenCookie = CookieUtil.getCookieFromCookieHeader(cookies, jwtProvider.getAccessTokenHeader()).orElseThrow();
+    this.refreshTokenCookie = CookieUtil.getCookieFromCookieHeader(cookies, jwtProvider.getRefreshTokenHeader()).orElseThrow();
 
+    Payload payload = jwtProvider.verifyToken(this.accessTokenCookie.getValue());
     LoginResponse loginResponse = exchange.getBody();
     Jwt jwt = loginResponse.getJwt();
-    Payload payload = jwtProvider.verifyToken(jwtProvider.getTokenPrefix() + jwt.getAccessToken());
     assertThat(payload.getUserId()).isEqualTo(ID);
+    assertThat(jwt.getAccessToken()).isEqualTo(jwtProvider.resolveToken(this.accessTokenCookie.getValue()));
+    assertThat(jwt.getRefreshToken()).isEqualTo(jwtProvider.resolveToken(this.refreshTokenCookie.getValue()));
 
-    accessToken = jwt.getAccessToken();
-    refreshToken = jwt.getRefreshToken();
+//    accessToken = jwt.getAccessToken();
+//    refreshToken = jwt.getRefreshToken();
 
-    System.out.println("after-accessToken = " + accessToken);
-    System.out.println("after-refreshToken = " + refreshToken);
+    System.out.println("after-accessToken = " + this.accessTokenCookie.getValue());
+    System.out.println("after-refreshToken = " + this.refreshTokenCookie.getValue());
   }
 }

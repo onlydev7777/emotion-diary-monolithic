@@ -43,7 +43,10 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
       return;
     }
 
-    String token = request.getHeader(jwtProvider.getHeader());
+//    String token = CookieUtil.getCookieValue(request, jwtProvider.getAccessTokenHeader());
+    String token = jwtProvider.resolveToken(
+        request.getHeader(jwtProvider.getAccessTokenHeader())
+    );
 
     if (redisService.blackListTokenGet(token)) {
       throw new JwtException("Token is blacklisted");

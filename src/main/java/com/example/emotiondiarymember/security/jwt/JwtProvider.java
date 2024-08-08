@@ -21,7 +21,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "jwt")
 public class JwtProvider {
 
-  private final String header;
+  private final String accessTokenHeader;
   private final String refreshTokenHeader;
   private final String iss;
   private final String secretKey;
@@ -30,9 +30,10 @@ public class JwtProvider {
   private final long refreshExpirationTime;
   private final static String CLAIMS_KEY = "payload";
 
-  public JwtProvider(String header, String refreshTokenHeader, String iss, String secretKey, long expirationTime, long refreshExpirationTime,
+  public JwtProvider(String accessTokenHeader, String refreshTokenHeader, String iss, String secretKey, long expirationTime,
+      long refreshExpirationTime,
       String tokenPrefix) {
-    this.header = header;
+    this.accessTokenHeader = accessTokenHeader;
     this.refreshTokenHeader = refreshTokenHeader;
     this.iss = iss;
     this.secretKey = secretKey;
