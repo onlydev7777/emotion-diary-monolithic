@@ -17,7 +17,7 @@ public class CorsConfig {
   private final JwtProvider jwtProvider;
 
   @Bean
-  public CorsConfigurationSource configurationSource() {
+  public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
     configuration.addAllowedOrigin("http://localhost:8081");//localhost:8081 에서의 요청 허용
     configuration.addAllowedHeader("*");//Request Header 전체 허용
