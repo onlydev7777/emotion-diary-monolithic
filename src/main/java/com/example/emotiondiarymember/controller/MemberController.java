@@ -1,7 +1,7 @@
 package com.example.emotiondiarymember.controller;
 
 import com.example.emotiondiarymember.controller.request.MemberJoinRequest;
-import com.example.emotiondiarymember.controller.response.MemberJoinResponse;
+import com.example.emotiondiarymember.controller.response.MemberResponse;
 import com.example.emotiondiarymember.dto.MemberDto;
 import com.example.emotiondiarymember.error.ApiResult;
 import com.example.emotiondiarymember.mapper.MemberMapper;
@@ -26,14 +26,14 @@ public class MemberController {
   private final PasswordEncoder passwordEncoder;
 
   @GetMapping
-  public ResponseEntity<ApiResult<MemberJoinResponse>> findMember() {
+  public ResponseEntity<ApiResult<MemberResponse>> findMember() {
     Long memberId = TokenUtil.getMemberId();
     MemberDto memberDto = service.findById(memberId);
     return ResponseEntity.ok(ApiResult.OK(mapper.toResponse(memberDto)));
   }
 
   @PostMapping("/signup")
-  public ResponseEntity<ApiResult<MemberJoinResponse>> joinMember(@RequestBody MemberJoinRequest request) {
+  public ResponseEntity<ApiResult<MemberResponse>> joinMember(@RequestBody MemberJoinRequest request) {
     MemberDto savedMemberDto = service.save(mapper.toDto(request, passwordEncoder));
     return ResponseEntity.ok(ApiResult.OK(mapper.toResponse(savedMemberDto)));
   }

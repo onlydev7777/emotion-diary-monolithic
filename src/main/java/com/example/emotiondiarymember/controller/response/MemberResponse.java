@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MemberJoinResponse {
+public class MemberResponse {
 
   private Long id;
   private String userId;
