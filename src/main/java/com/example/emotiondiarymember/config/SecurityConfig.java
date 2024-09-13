@@ -73,8 +73,8 @@ public class SecurityConfig {
   private final CustomAuthenticationFailureEntryPoint customAuthenticationFailureEntryPoint;
   private final JwtProvider jwtProvider;
   private final RedisService redisService;
-  private final String[] SKIP_LIST = {"/", "/login", "/member/signup", "/auth/refresh-token", "/error",
-      "/index", "/oauth2/**",
+  private final String[] SKIP_LIST = {"/", "/login", "/member/signup", "/auth/**", "/error",
+      "/index", "/oauth2/**", "/actuator/**",
       "/js/**", "/images/**", "/css/**", "/scss/**", "/favicon.ico"};
 
   @Bean
