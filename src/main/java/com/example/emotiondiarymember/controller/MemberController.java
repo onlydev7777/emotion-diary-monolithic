@@ -5,10 +5,13 @@ import com.example.emotiondiarymember.controller.response.MemberResponse;
 import com.example.emotiondiarymember.dto.MemberDto;
 import com.example.emotiondiarymember.error.ApiResult;
 import com.example.emotiondiarymember.mapper.MemberMapper;
+import com.example.emotiondiarymember.security.authentication.LoginAuthentication;
+import com.example.emotiondiarymember.security.jwt.Payload;
 import com.example.emotiondiarymember.security.util.TokenUtil;
 import com.example.emotiondiarymember.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,5 +39,12 @@ public class MemberController {
   public ResponseEntity<ApiResult<MemberResponse>> joinMember(@RequestBody MemberJoinRequest request) {
     MemberDto savedMemberDto = service.save(mapper.toDto(request, passwordEncoder));
     return ResponseEntity.ok(ApiResult.OK(mapper.toResponse(savedMemberDto)));
+  }
+
+  @GetMapping(value = "/test-ok")
+  public ResponseEntity<ApiResult<Payload>> testOk() {
+    LoginAuthentication authentication = (LoginAuthentication) SecurityContextHolder.getContext().getAuthentication();
+    Payload principal = (Payload) authentication.getPrincipal();
+    return ResponseEntity.ok(ApiResult.OK(principal));
   }
 }

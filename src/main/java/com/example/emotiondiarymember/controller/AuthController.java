@@ -83,11 +83,4 @@ public class AuthController {
     SecurityContextHolder.getContext().setAuthentication(refreshAuthentication);
     new LoginSuccessHandler(redisService, jwtProvider).onAuthenticationSuccess(request, response, refreshAuthentication);
   }
-
-  @GetMapping(value = "/test-ok")
-  public ResponseEntity<ApiResult<Payload>> testOk() {
-    LoginAuthentication authentication = (LoginAuthentication) SecurityContextHolder.getContext().getAuthentication();
-    Payload principal = (Payload) authentication.getPrincipal();
-    return ResponseEntity.ok(ApiResult.OK(principal));
-  }
 }
